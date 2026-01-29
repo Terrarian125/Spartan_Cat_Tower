@@ -25,6 +25,8 @@ private:
     Ball2D* partner = nullptr;
 
     VECTOR2 velocity;
+	VECTOR2 startPosition;// 初期位置 (リセット用)
+	void ResetPosition() { position = startPosition; velocity = VECTOR2(0, 0); }
 
     float RADIUS;
 	float G;// 重力

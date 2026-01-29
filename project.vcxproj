@@ -159,6 +159,7 @@
     <ClInclude Include="Library\Time.h" />
     <ClInclude Include="Source\Ball2D.h" />
     <ClInclude Include="Source\BootScene.h" />
+    <ClInclude Include="Source\ClearScene.h" />
     <ClInclude Include="Source\global.h" />
     <ClInclude Include="Source\Screen.h" />
     <ClInclude Include="Source\PlayScene.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="Library\Time.cpp" />
     <ClCompile Include="Source\Ball2D.cpp" />
     <ClCompile Include="Source\BootScene.cpp" />
+    <ClCompile Include="Source\ClearScene.cpp" />
     <ClCompile Include="Source\PlayScene.cpp" />
     <ClCompile Include="Source\newFile.cpp" />
     <ClCompile Include="Source\SceneFactory.cpp" />

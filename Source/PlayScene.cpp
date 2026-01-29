@@ -19,5 +19,5 @@ void PlayScene::Init() {
 
 void PlayScene::Update() {}
 void PlayScene::Draw() {
-    DrawString(10, 10, "A D: Move / Space: Jump", GetColor(255, 255, 255));
+    //DrawString(10, 10, "A D: Move / Space: Jump", GetColor(255, 255, 255));
 }
