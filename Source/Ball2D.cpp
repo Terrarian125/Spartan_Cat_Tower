@@ -166,7 +166,7 @@ void Ball2D::Draw() {
         DrawLine(dx, dy, (int)(pPos.x - sx), (int)(pPos.y - sy), GetColor(255, 255, 255), 2);
     }
 
-    //画像の切り替え（ダメージ中なら dmgImgHandle を優先）
+    //画像の切り替え（ダメージ中なら dmgImgHandle を優先
     int currentImg = (painTimer > 0 && dmgImgHandle != -1) ? dmgImgHandle : hImage;
 
     if (currentImg != -1) {
