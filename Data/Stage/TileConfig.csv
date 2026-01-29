@@ -1,0 +1,8 @@
+"ID,ImagePath,AnimCount,Function,Description"
+"02,block.png,1,SOLID,通常の壁"
+"03,Bg.png,1,ONE_WAY,下からすり抜け足場"
+"04,slope_r.png,1,SLOPE_R,坂道（右上がり）"
+"05,slope_l.png,1,SLOPE_L,坂道（左上がり）"
+"06,spring.png,4,SPRING,バネ（4コマアニメ）"
+"07,ice.png,1,ICE,滑る床"
+"99,goal.png,6,GOAL,ゴール（6コマアニメ）"

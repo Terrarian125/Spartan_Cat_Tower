@@ -1,0 +1,145 @@
+#include "TitleScene.h"
+#include <DxLib.h>
+#include "../Library/Input.h"
+#include "../Library/SceneManager.h"
+#include "../Library/GuiButton.h"
+#include "../Library/GameSetting.h"
+#include "SettingPanel.h"
+
+TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
+    LogoBg = LoadGraph("data/image/Bg.png");
+    Logo = LoadGraph("data/image/Title.png");
+    Op_Music = LoadSoundMem("Data/Music/OP.mp3");
+
+    // 設定の読み込みと適用
+    GameSetting::Load();
+    GameSetting::Apply(Op_Music);
+    PlaySoundMem(Op_Music, DX_PLAYTYPE_LOOP);
+
+    mySettingPanel = new SettingPanel();
+
+    //メインメニューのボタン配置
+    int bx = 100,
+		by = 300,
+        bw = 300,
+        bh = 60;
+
+    auto bNew = new GuiButton(bx, by, bw, bh, "はじめから");
+    bNew->onClick = []() { SceneManager::ChangeScene("PLAY"); };
+    buttons.push_back(bNew);
+
+    auto bContinue = new GuiButton(bx, by+80, bw, bh, "つづきから");
+    bContinue->onClick = []() { /* ロード処理 */ };
+    buttons.push_back(bContinue);
+
+    auto bTutorial = new GuiButton(bx, by + 160, bw, bh, "チュートリアル");
+    bTutorial->onClick = []() { SceneManager::ChangeScene("CUSTOMCHARACTER"); };
+    buttons.push_back(bTutorial);
+
+    auto bSet = new GuiButton(bx, by+240, bw, bh, "設定");
+    bSet->onClick = [this]() { this->mySettingPanel->SetVisible(true); };
+    buttons.push_back(bSet);
+
+    auto bExit = new GuiButton(bx, by+320, bw, bh, "ゲーム終了");
+    bExit->onClick = [this]() {
+        this->isExitDialogVisible = true;
+        for (auto b : this->exitButtons) b->SetActive(true);
+        this->currentSelect = 1; // ダイアログ内での初期選択をYESに
+        };
+    buttons.push_back(bExit);
+
+    //終了確認ダイアログ用のボタン配置
+    int cx = 1280 / 2;
+    int cy = 720 / 2;
+
+    auto bYes = new GuiButton(cx - 160, cy + 50, 150, 50, "はい");
+    bYes->onClick = []() { SceneManager::Exit(); };
+    bYes->SetActive(false); // 初期状態は非アクティブ
+    exitButtons.push_back(bYes);
+
+    auto bNo = new GuiButton(cx + 10, cy + 50, 150, 50, "いいえ");
+    bNo->onClick = [this]() {
+        this->isExitDialogVisible = false;
+        for (auto b : this->exitButtons) b->SetActive(false);
+        };
+    bNo->SetActive(false); // 初期状態は非アクティブ
+    exitButtons.push_back(bNo);
+}
+
+void TitleScene::Update() {
+    //終了確認ダイアログ表示中
+    if (isExitDialogVisible) {
+        for (auto b : exitButtons) b->Update();
+
+        // ダイアログ内のキー操作 (左右でYES/NO切り替え)
+        if (Input::IsKeyDown(KEY_INPUT_LEFT))  currentSelect = 0;
+        if (Input::IsKeyDown(KEY_INPUT_RIGHT)) currentSelect = 1;
+
+        for (int i = 0; i < (int)exitButtons.size(); i++) {
+            exitButtons[i]->SetFocus(i == currentSelect);
+            if (exitButtons[i]->IsMouseOver()) currentSelect = i;
+        }
+        return;
+    }
+
+    //設定パネル表示中
+    if (mySettingPanel->IsVisible()) {
+        mySettingPanel->Update();
+        GameSetting::Apply(Op_Music);
+        return;
+    }
+
+    //通常時（メインメニュー）
+    for (auto b : buttons) {
+        b->Update();
+    }
+
+    // メインメニューのキー操作 (上下)
+    if (Input::IsKeyDown(KEY_INPUT_DOWN)) currentSelect = (currentSelect + 1) % buttons.size();
+    if (Input::IsKeyDown(KEY_INPUT_UP))   currentSelect = (currentSelect - 1 + (int)buttons.size()) % (int)buttons.size();
+
+    for (int i = 0; i < (int)buttons.size(); i++) {
+        buttons[i]->SetFocus(i == currentSelect);
+        if (buttons[i]->IsMouseOver()) currentSelect = i;
+    }
+}
+
+void TitleScene::Draw() {
+    // 基本背景
+    DrawExtendGraph(0, 0, 1280, 720, LogoBg, FALSE);
+    DrawGraph(100, 50, Logo, TRUE);
+
+    // メインメニューボタン
+    for (auto b : buttons) b->Draw();
+
+    // 設定パネル
+    mySettingPanel->Draw();
+
+    // 終了確認ダイアログの最前面描画
+    if (isExitDialogVisible) {
+        // 背景を暗くして操作不能感を出す
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+        DrawBox(0, 0, 1280, 720, GetColor(0, 0, 0), TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+        // ダイアログ外枠
+        int vx = 440, vy = 260, vw = 400, vh = 200;
+        DrawBox(vx, vy, vx + vw, vy + vh, GetColor(20, 20, 40), TRUE);
+        DrawBox(vx, vy, vx + vw, vy + vh, GetColor(255, 255, 255), FALSE);
+
+		DrawFormatString(vx + 95, vy + 50, GetColor(255, 255, 255), "本当にゲームを終了しますか？");
+
+        // YES/NOボタン
+        for (auto b : exitButtons) b->Draw();
+    }
+}
+
+TitleScene::~TitleScene() {
+    StopSoundMem(Op_Music);
+    DeleteSoundMem(Op_Music);
+    DeleteGraph(LogoBg);
+    DeleteGraph(Logo);
+
+    // メモリ解放
+    delete mySettingPanel;
+}
