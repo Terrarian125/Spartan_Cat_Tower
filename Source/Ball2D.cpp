@@ -74,132 +74,57 @@ void Ball2D::Update() {
     Stage* stage = FindGameObject<Stage>();
     if (!stage) return;
 
-    // 初回リセット位置保存
+    // 初回の更新時にリセット用の初期位置を保存します
     static bool isFirstUpdate = true;
     if (isFirstUpdate) {
         startPosition = position;
         isFirstUpdate = false;
     }
 
-    // ESCでリセット
+    // エスケープキーが押されたら自分とパートナーの位置を初期状態に戻します
     if (Input::IsKeyDown(KEY_INPUT_ESCAPE)) {
         ResetPosition();
         if (partner) partner->ResetPosition();
         return;
     }
 
-    // 入力と重力
+    float moveInput = 0;
     bool isDownPressed = false;
+
+    // プレイヤー操作時の移動入力とジャンプの判定を行います
     if (isPlayer) {
-        float moveX = 0;
-        if (Input::IsKeepKeyDown(KEY_INPUT_A)) moveX -= SPEED;
-        if (Input::IsKeepKeyDown(KEY_INPUT_D)) moveX += SPEED;
+        if (Input::IsKeepKeyDown(KEY_INPUT_A)) moveInput -= SPEED;
+        if (Input::IsKeepKeyDown(KEY_INPUT_D)) moveInput += SPEED;
         if (Input::IsKeepKeyDown(KEY_INPUT_S)) isDownPressed = true;
 
-        if (stage->GetTileFunction(position.x, position.y + RADIUS + 1) == "ICE") {
-            velocity.x += moveX * 0.2f; velocity.x *= 0.98f;
-        }
-        else {
-            velocity.x += moveX; velocity.x *= 0.90f;
-        }
-
+        // 接地に近い状態であればスペースキーでジャンプ初速を与えます
         if (Input::IsKeyDown(KEY_INPUT_SPACE) && abs(velocity.y) < 1.0f) {
             velocity.y = JUMP;
         }
     }
-    velocity.y += G;
-    if (!isPlayer) velocity.x *= 0.95f;
 
-    // スプリング
+    // パートナーとの間にある紐の伸縮による物理計算を行います
     if (isPlayer && partner) {
         VECTOR2 diff = position - partner->GetPosition();
         float dist = VSize(diff);
         if (dist > SPRING_L && dist > 0.1f) {
             float f = (dist - SPRING_L) * K;
             VECTOR2 norm = VECTOR2(diff.x / dist, diff.y / dist);
+            // 相手側へ引っ張る力を加えます
             partner->AddForce(VECTOR2(norm.x * f / partner->mass, norm.y * f / partner->mass));
         }
     }
 
-    // --- 水平移動と壁判定 (ガクつき防止版) ---
-    float oldX = position.x;
-    position.x += velocity.x;
+    // 重力、摩擦、移動、およびトゲ床などのギミック判定をステージギミッククラスに委託します
+    // 最後に this を渡すことでギミック側から OnDamage を呼び出せるようにしています
+    gimmick.SetParams(G, JUMP);
+    gimmick.UpdatePhysics(position, velocity, RADIUS, isPlayer, isDownPressed, moveInput, voiceHandle, this);
 
-    // 進行方向の壁をチェック
-    float sideX = (velocity.x > 0) ? (position.x + RADIUS) : (position.x - RADIUS);
-    // 足元よりも少し上（段差許容範囲）をチェック
-    std::string wallAttr = stage->GetTileFunction(sideX, position.y + RADIUS - 10.0f);
-
-    if (wallAttr == "SOLID") {
-        // 段差として登れるかチェック（頭上が空いているか）
-        if (stage->GetTileFunction(position.x, position.y - RADIUS) == "NONE") {
-            position.y -= 8.0f; // 以前の「坂道が登れる」魔法の数字
-        }
-        else {
-            // 登れない壁なら、古い座標に戻して速度を殺す（ワープさせない）
-            position.x = oldX;
-            velocity.x = 0;
-        }
-    }
-
-    // --- 垂直移動と床・坂道・ゴール判定 ---
-    position.y += velocity.y;
-
-    float footX = position.x;
-    float footY = position.y + RADIUS;
-    std::string attr = stage->GetTileFunction(footX, footY);
-
-    // ゴール
-    if (attr == "GOAL") {
-        SceneManager::ChangeScene("CLEAR");
-        return;
-    }
-
-    // 坂道判定
-    if (attr == "SLOPE_R" || attr == "SLOPE_L") {
-        float localX = fmod(footX, (float)stage->TILE_SIZE);
-        if (localX < 0) localX += stage->TILE_SIZE;
-        float tx = localX / (float)stage->TILE_SIZE;
-        float ty = (attr == "SLOPE_R") ? (1.0f - tx) : tx;
-
-        float tileBaseY = floor(footY / stage->TILE_SIZE) * stage->TILE_SIZE;
-        float targetY = tileBaseY + (ty * stage->TILE_SIZE) - RADIUS;
-
-        if (velocity.y >= 0 || position.y > targetY - 15.0f) {
-            position.y = targetY;
-            velocity.y = 0;
-        }
-    }
-    // 床判定 (SOLIDは垂直方向のみ補正)
-    else if (attr == "SOLID" || attr == "SPRING" || attr == "ICE" || attr == "ONE_WAY") {
-        bool isLanding = false;
-        if (attr == "ONE_WAY") {
-            if (!isDownPressed) {
-                float tileTopY = floor(footY / stage->TILE_SIZE) * stage->TILE_SIZE;
-                if (velocity.y > 0 && footY >= tileTopY && footY <= tileTopY + velocity.y + 10.0f) {
-                    isLanding = true;
-                }
-            }
-        }
-        else {
-            if (velocity.y > 0) isLanding = true;
-        }
-
-        if (isLanding) {
-            position.y = floor(footY / stage->TILE_SIZE) * stage->TILE_SIZE - RADIUS;
-            if (attr == "SPRING") {
-                velocity.y = JUMP * 1.5f;
-                if (voiceHandle != -1) PlaySoundMem(voiceHandle, DX_PLAYTYPE_BACK);
-            }
-            else {
-                velocity.y = 0;
-            }
-        }
-    }
-
-    // タイマー更新
+    // ダメージ演出用のタイマーとバンプエフェクトの残り時間を更新します
     if (painTimer > 0) painTimer--;
-    if (bump.active) { if (--bump.life <= 0) bump.active = false; }
+    if (bump.active) {
+        if (--bump.life <= 0) bump.active = false;
+    }
 }
 
 void Ball2D::OnDamage() {

@@ -83,6 +83,9 @@
     <ClCompile Include="Source\ClearScene.cpp">
       <Filter>Scene\[09]ClearScene</Filter>
     </ClCompile>
+    <ClCompile Include="Source\StageGimmick.cpp">
+      <Filter>Scene\[02]PlayScene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Screen.h" />
@@ -180,6 +183,9 @@
     </ClInclude>
     <ClInclude Include="Source\ClearScene.h">
       <Filter>Scene\[09]ClearScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StageGimmick.h">
+      <Filter>Scene\[02]PlayScene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
