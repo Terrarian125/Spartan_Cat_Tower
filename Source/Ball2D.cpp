@@ -54,15 +54,15 @@ void Ball2D::LoadParam(std::string path) {
         // GetFloatを呼ぶ前に、値が空でないか、数値っぽいかを確認するのが安全
         float val = (float)csv.GetFloat(i, 1);
 
-        if (name == "Radius")           RADIUS = val;
-        else if (name == "Gravity")     G = val;
-        else if (name == "MoveSpeed")   SPEED = val;
-        else if (name == "JumpHeight")  tempHeight = val;
-        else if (name == "BumpLife")    BUMP_MAX_LIFE = val;
-        else if (name == "SpringLength") SPRING_L = val;
-        else if (name == "SpringK")      K = val;
-        else if (isPlayer && name == "MassPlayer")    mass = val;
-        else if (!isPlayer && name == "MassPartner")  mass = val;
+		if (name == "Radius")           RADIUS = val;// 半径
+		else if (name == "Gravity")     G = val;// 重力加速度
+		else if (name == "MoveSpeed")   SPEED = val;// 移動速度
+		else if (name == "JumpHeight")  tempHeight = val;// ジャンプの高さ（初速計算用）
+		else if (name == "BumpLife")    BUMP_MAX_LIFE = val;// バンプエフェクトの最大寿命
+		else if (name == "SpringLength") SPRING_L = val;// 紐の自然長
+		else if (name == "SpringK")      K = val;// バネ定数
+		else if (isPlayer && name == "MassPlayer")    mass = val;// プレイヤー用の質量
+		else if (!isPlayer && name == "MassPartner")  mass = val;// パートナー用の質量
     }
 
     // 重力からジャンプ初速を計算
@@ -91,7 +91,7 @@ void Ball2D::Update() {
     float moveInput = 0;
     bool isDownPressed = false;
 
-    // プレイヤー操作時の移動入力とジャンプの判定を行います
+    // プレイヤー操作時の移動入力とジャンプの判定
     if (isPlayer) {
         if (Input::IsKeepKeyDown(KEY_INPUT_A)) moveInput -= SPEED;
         if (Input::IsKeepKeyDown(KEY_INPUT_D)) moveInput += SPEED;
@@ -103,7 +103,7 @@ void Ball2D::Update() {
         }
     }
 
-    // パートナーとの間にある紐の伸縮による物理計算を行います
+    // パートナーとの間にある紐の伸縮による物理計算
     if (isPlayer && partner) {
         VECTOR2 diff = position - partner->GetPosition();
         float dist = VSize(diff);
@@ -115,7 +115,7 @@ void Ball2D::Update() {
         }
     }
 
-    // 重力、摩擦、移動、およびトゲ床などのギミック判定をステージギミッククラスに委託します
+    // 重力、摩擦、移動、およびトゲ床などのギミック判定をステージギミッククラスに委託
     // 最後に this を渡すことでギミック側から OnDamage を呼び出せるようにしています
     gimmick.SetParams(G, JUMP);
     gimmick.UpdatePhysics(position, velocity, RADIUS, isPlayer, isDownPressed, moveInput, voiceHandle, this);

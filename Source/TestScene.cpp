@@ -8,7 +8,7 @@
 TestScene::TestScene()
 {
 	tImage = LoadGraph("data/image/tImage.png");
-	tLogo = LoadGraph("data/image/UI/tLogo.png");
+	//tLogo = LoadGraph("data/image/UI/tLogo.png");
 
 	screenPattern = 0;
 	alpha = 0;
@@ -27,7 +27,7 @@ TestScene::~TestScene()
 	//メモリに確保していたサウンドデータと画像データを解放する
 	DeleteSoundMem(tSound);
 	DeleteGraph(tImage);
-	DeleteGraph(tLogo);
+	//DeleteGraph(tLogo);
 }
 
 void TestScene::Update()
@@ -70,7 +70,7 @@ void TestScene::Draw()
 	{
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 		DrawGraph(0, 0, tImage, TRUE);
-		DrawGraph(400, 300, tLogo, TRUE);
+		//DrawGraph(400, 300, tLogo, TRUE);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
 }
