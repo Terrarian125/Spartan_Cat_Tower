@@ -24,7 +24,7 @@ void GuiButton::Update() {
         if (Input::IsMouseUP(MOUSE_INPUT_LEFT)) {
             triggered = true;
         }
-        else if (Input::IsKeyUP(KEY_INPUT_RETURN)) {
+		else if (Input::IsKeyUP(KEY_INPUT_RETURN)) {//キーボードのEnterキーも反応させる
             triggered = true;
         }
 
@@ -45,19 +45,36 @@ void GuiButton::Update() {
 
 void GuiButton::Draw() {
     if (!active) return;
+
     bool highlight = IsMouseOver() || isFocused;
-    unsigned int drawCol = highlight ? hoverCol : color;
 
-    DrawBox(x, y, x + width, y + height, drawCol, TRUE);
-    DrawBox(x, y, x + width, y + height, GetColor(255, 255, 255), FALSE);
+    if (imageHandle != -1) {
+        //画像がある場合
+        // 輝度を下げて「通常」と「ハイライト」を表現する例
+        if (highlight) {
+            SetDrawBright(255, 255, 255); // 明るく
+        }
+        else {
+            SetDrawBright(180, 180, 180); // 少し暗く
+        }
+        // 画像をボタンのサイズに引き伸ばして描画
+        DrawExtendGraph(x, y, x + width, y + height, imageHandle, TRUE);
+        SetDrawBright(255, 255, 255); // 輝度を戻す
+    }
+    else {
+		//画像がない場合はこっちで描画
+        unsigned int drawCol = highlight ? hoverCol : color;
+        DrawBox(x, y, x + width, y + height, drawCol, TRUE);
+        DrawBox(x, y, x + width, y + height, GetColor(255, 255, 255), FALSE);
 
-    int tw = GetDrawStringWidth(label.c_str(), (int)label.length());
-    DrawString(x + (width - tw) / 2, y + (height / 2) - 8, label.c_str(), GetColor(255, 255, 255));
+        int textW = GetDrawStringWidth(label.c_str(), (int)label.length());
+        DrawString(x + (width - textW) / 2, y + (height - 16) / 2, label.c_str(), GetColor(255, 255, 255));
+    }
 }
 
 bool GuiButton::IsMouseOver() {
-    if (!active) return false;
-    int mx = Input::GetMouseX();
+	if (!active) return false;// 非アクティブならfalse
+	int mx = Input::GetMouseX();
     int my = Input::GetMouseY();
-    return (mx >= x && mx <= x + width && my >= y && my <= y + height);
+	return (mx >= x && mx <= x + width && my >= y && my <= y + height);// マウス座標がボタン内にあるか
 }

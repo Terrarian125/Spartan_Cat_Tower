@@ -7,7 +7,11 @@
 #include "SettingPanel.h"
 
 TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
-    LogoBg = LoadGraph("data/image/Bg.png");
+    LogoBg = LoadGraph("data/Movie/Bg.mp4");
+    if (LogoBg != -1) {
+        PlayMovieToGraph(LogoBg, 1);
+    }
+
     Logo = LoadGraph("data/image/Title.png");
     Op_Music = LoadSoundMem("Data/Music/OP.mp3");
 
@@ -19,28 +23,30 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
     mySettingPanel = new SettingPanel();
 
     //メインメニューのボタン配置
-    int bx = 100,
-		by = 300,
-        bw = 300,
-        bh = 60;
+	int bx = 50, //ボタンのX座標
+		by = 300, //ボタンのY座標
+		bw = 400,//ボタンの幅
+		bh = 90,  //ボタンの高さ
+	    bi = 100; //ボタン間隔
 
-    auto bNew = new GuiButton(bx, by, bw, bh, "はじめから");
+    int btnImg_new = LoadGraph("data/image/btnImg_new.png");
+	int btnImg_tutorial = LoadGraph("data/image/btnImg_tutorial.png");
+
+    auto bNew = new GuiButton(bx, by, bw, bh, "ゲームスタート！");
+	bNew->SetImage(btnImg_new);//ボタン画像を設定、なければデフォルトの四角形ボタンになる
     bNew->onClick = []() { SceneManager::ChangeScene("PLAY"); };
     buttons.push_back(bNew);
 
-    auto bContinue = new GuiButton(bx, by+80, bw, bh, "つづきから");
-    bContinue->onClick = []() { /* ロード処理 */ };
-    buttons.push_back(bContinue);
-
-    auto bTutorial = new GuiButton(bx, by + 160, bw, bh, "チュートリアル");
+    auto bTutorial = new GuiButton(bx, by + bi, bw, bh, "遊び方");
+	bTutorial->SetImage(btnImg_tutorial);//ボタン画像を設定、なければデフォルトの四角形ボタンになる
     bTutorial->onClick = []() { SceneManager::ChangeScene("CUSTOMCHARACTER"); };
     buttons.push_back(bTutorial);
 
-    auto bSet = new GuiButton(bx, by+240, bw, bh, "設定");
+    auto bSet = new GuiButton(bx, by+bi*2, bw, bh, "設定");
     bSet->onClick = [this]() { this->mySettingPanel->SetVisible(true); };
     buttons.push_back(bSet);
 
-    auto bExit = new GuiButton(bx, by+320, bw, bh, "ゲーム終了");
+    auto bExit = new GuiButton(bx, by+bi*3, bw, bh, "ゲーム終了");
     bExit->onClick = [this]() {
         this->isExitDialogVisible = true;
         for (auto b : this->exitButtons) b->SetActive(true);
@@ -67,6 +73,13 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
 }
 
 void TitleScene::Update() {
+	//動画更新
+    if (LogoBg != -1) {
+        // GetMovieStateToGraph が 1 を返している間は再生中
+        if (GetMovieStateToGraph(LogoBg) == 1) {
+			UpdateMovieToGraph(LogoBg);
+		}
+	}
     //終了確認ダイアログ表示中
     if (isExitDialogVisible) {
         for (auto b : exitButtons) b->Update();
@@ -106,6 +119,7 @@ void TitleScene::Update() {
 
 void TitleScene::Draw() {
     // 基本背景
+    //PlayMovieToGraph(LogoBg, DX_PLAYTYPE_LOOP);
     DrawExtendGraph(0, 0, 1280, 720, LogoBg, FALSE);
     DrawGraph(100, 50, Logo, TRUE);
 
