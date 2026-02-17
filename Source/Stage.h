@@ -36,4 +36,5 @@ private:
     std::vector<std::vector<int>> mapData;
     VECTOR2 scroll;
     VECTOR2 startPos;
+    int bgHandle;
 };

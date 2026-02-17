@@ -11,7 +11,7 @@ BootScene::~BootScene()
 
 void BootScene::Update()
 {
-	SceneManager::ChangeScene("TEST");
+	SceneManager::ChangeScene("PLAY");
 	//SceneManager::ChangeScene("PLAY");
 }
 

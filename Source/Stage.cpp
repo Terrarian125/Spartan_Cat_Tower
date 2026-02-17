@@ -49,16 +49,29 @@ void Stage::LoadConfig(std::string path) {
 void Stage::LoadMap(std::string path) {
     CsvReader csv(path);
     mapData.clear();
+    bgHandle = -1; // 背景ハンドルをリセット
     if (csv.GetLines() <= 0) return;
 
-    for (int i = 0; i < csv.GetLines(); i++) {
+    int startLine = 0;
+
+    // 1行目が背景設定（BG）かどうかを判定
+    if (csv.GetString(0, 0) == "BG") {
+        std::string bgName = csv.GetString(0, 1);
+        std::string bgPath = "Data/Image/" + bgName;
+        bgHandle = LoadGraph(bgPath.c_str());
+        // 2行目からがマップデータなので開始行をずらす
+        startLine = 1;
+    }
+
+    for (int i = startLine; i < csv.GetLines(); i++) {
         std::vector<int> row;
         for (int j = 0; j < csv.GetColumns(i); j++) {
             int val = csv.GetInt(i, j);
             row.push_back(val);
-            // 01番をプレイヤーのスタート位置として記録
+
+            // プレイヤーのスタート位置（マップデータの行番号に合わせるため i - startLine）
             if (val == 1) {
-                startPos = VECTOR2(j * TILE_SIZE + TILE_SIZE / 2.0f, i * TILE_SIZE + TILE_SIZE / 2.0f);
+                startPos = VECTOR2(j * TILE_SIZE + TILE_SIZE / 2.0f, (i - startLine) * TILE_SIZE + TILE_SIZE / 2.0f);
             }
         }
         mapData.push_back(row);
@@ -88,6 +101,15 @@ void Stage::Update() {
 }
 
 void Stage::Draw() {
+    // 最初に背景を描画（一番奥）
+    if (bgHandle != -1) {
+        // 画面全体に描画する場合（スクロールさせない固定背景）
+        DrawGraph(0, 0, bgHandle, FALSE);
+
+        // もし背景もスクロールさせたい場合は以下
+        // DrawGraph((int)(-scroll.x * 0.5f), (int)(-scroll.y * 0.5f), bgHandle, FALSE);
+    }
+
     // 150ミリ秒ごとにアニメーションのコマを進める
     int animIndex = (GetNowCount() / 150);
 
@@ -95,13 +117,11 @@ void Stage::Draw() {
         for (int x = 0; x < (int)mapData[y].size(); x++) {
             int id = mapData[y][x];
 
-            // 0(空白) または 1(スタート地点) は描画しない
             if (id <= 1) continue;
 
             int dx = (int)(x * TILE_SIZE - scroll.x);
             int dy = (int)(y * TILE_SIZE - scroll.y);
 
-            // 画面外描画スキップ
             if (dx < -TILE_SIZE || dx > Screen::WIDTH || dy < -TILE_SIZE || dy > Screen::HEIGHT) continue;
 
             if (catalog.count(id)) {
@@ -109,11 +129,9 @@ void Stage::Draw() {
                 int h = t.handles[animIndex % t.animCount];
 
                 if (h != -1) {
-                    // 画像の描画
                     DrawGraph(dx, dy, h, TRUE);
                 }
                 else {
-                    // 画像がない場合の仮描画（枠とID番号）
                     DrawBox(dx, dy, dx + (int)TILE_SIZE, dy + (int)TILE_SIZE, GetColor(80, 80, 80), FALSE);
                     DrawFormatString(dx + 20, dy + 20, GetColor(150, 150, 150), "%02d", id);
                 }
