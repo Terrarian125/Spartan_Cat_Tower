@@ -3,6 +3,7 @@
 #include "../Library/Input.h"
 #include "../Library/CsvReader.h"
 #include <math.h>
+#include "StageGimmick.h"
 
 int Ball2D::lastTotalDamage = 0;
 
@@ -125,7 +126,7 @@ void Ball2D::Update() {
         if (partner) {
             VECTOR2 diff = position - partner->GetPosition();
             float dist = VSize(diff);
-			if (dist > SPRING_L * 2.0f) {//ここの３.0fは調整用の係数
+			if (dist > SPRING_L * 2.0f) {//ここの2.0fは調整用の係数
                 if (painTimer <= 0) OnDamage();
             }
         }
@@ -139,12 +140,32 @@ void Ball2D::Update() {
 }
 
 void Ball2D::OnDamage() {
-    painTimer = 180;    //1秒間ダメージ顔
-    damageCount++;     //クリアシーン用の蓄積
+    if (painTimer <= 0) { //無敵時間中でなければ
+        painTimer = 180;  //3秒間ダメージ顔
 
-    //たんこぶ出現
-    bump.active = true;
-    bump.life = 120;   //2秒間たんこぶ表示
+        if (!isPlayer) {
+            damageCount++;
+
+            //ダメージに応じた音量計算
+            int volume = 255;
+            if (damageCount >= 5) {
+                //5回から小さくなり始め、30回で最小になる計算
+                //輝度と同じく 255 - (damageCount - 5) * 9
+                volume = 255 - (damageCount - 5) * 9;
+                if (volume < 30) volume = 30; // 完全に消えると寂しいので最低値を設定
+            }
+
+            //ボイスの音量を変更
+            if (voiceHandle != -1) {
+                ChangeVolumeSoundMem(volume, voiceHandle);
+                PlaySoundMem(voiceHandle, DX_PLAYTYPE_BACK);
+            }
+        }
+
+        //たんこぶ出現
+        bump.active = true;
+        bump.life = 120;
+    }
 }
 
 void Ball2D::Draw() {
@@ -157,27 +178,48 @@ void Ball2D::Draw() {
         DrawLine(dx, dy, (int)(pPos.x - sx), (int)(pPos.y - sy), GetColor(255, 255, 255), 2);
     }
 
-    //画像の切り替え（ダメージ中なら dmgImgHandle を優先
+    //ダメージに応じた黒ずみ（輝度）計算 
+    int brightness = 255;
+    if (!isPlayer && damageCount >= 5) {
+        //5回から開始して30回でほぼ黒になる計算
+        //255 - (現在のダメージ - 5) * 9
+        brightness = 255 - (damageCount - 5) * 9;
+        if (brightness < 30) brightness = 30; //最低値を30に固定
+    }
+
+    //画像描画前に輝度を設定
+    SetDrawBright(brightness, brightness, brightness);
+
+    //画像の切り替え（ダメージ中なら dmgImgHandle を優先）
     int currentImg = (painTimer > 0 && dmgImgHandle != -1) ? dmgImgHandle : hImage;
 
     if (currentImg != -1) {
         DrawExtendGraph(dx - (int)RADIUS, dy - (int)RADIUS, dx + (int)RADIUS, dy + (int)RADIUS, currentImg, TRUE);
     }
     else {
+        //画像がない場合の円にも輝度が適用されます
         DrawCircle(dx, dy, (int)RADIUS, color, TRUE);
     }
 
-    if (bump.active) {
-        float s = bump.life / BUMP_MAX_LIFE;
-        DrawCircle((int)(dx + bump.localPos.x), (int)(dy + bump.localPos.y), (int)(12 * s), GetColor(255, 100, 100), TRUE);
+    //たんこぶやUIを暗くしないために輝度をリセット
+    SetDrawBright(255, 255, 255);
+
+    ////たんこぶ出現
+    //if (bump.active) {
+    //    float s = bump.life / BUMP_MAX_LIFE;
+    //    DrawCircle((int)(dx + bump.localPos.x), (int)(dy + bump.localPos.y), (int)(12 * s), GetColor(255, 100, 100), TRUE);
+    //}
+
+    // 座標のデバッグ表示
+    if (isPlayer) {
+        DrawFormatString(10, 10, GetColor(255, 255, 255), "X:%.1f Y:%.1f", position.x, position.y);
+    }
+    // ダメージ回数の表示
+    if (!isPlayer) {
+        DrawFormatString(10, 30, GetColor(255, 255, 255), "Damage: %d", damageCount);
+    }
+    if (isPlayer) {
+        gimmick.DrawFade();
     }
 
-    //座標のデバッグ表示
-    if (isPlayer) {
-        DrawFormatString(10, 10, GetColor(0, 0, 0), "X:%.1f Y:%.1f", position.x, position.y);
-    }
-	//ダメージ回数の表示
-	if (!isPlayer) {
-		DrawFormatString(10, 30, GetColor(0, 0, 0), "Damage: %d", damageCount);
-	}
 }

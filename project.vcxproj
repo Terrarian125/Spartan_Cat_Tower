@@ -171,6 +171,7 @@
     <ClInclude Include="Source\StageSelectScene.h" />
     <ClInclude Include="Source\TestScene.h" />
     <ClInclude Include="Source\TitleScene.h" />
+    <ClInclude Include="Source\Tutorial.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -203,6 +204,7 @@
     <ClCompile Include="Source\StageSelectScene.cpp" />
     <ClCompile Include="Source\TestScene.cpp" />
     <ClCompile Include="Source\TitleScene.cpp" />
+    <ClCompile Include="Source\Tutorial.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

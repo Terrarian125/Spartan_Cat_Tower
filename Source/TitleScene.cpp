@@ -37,9 +37,9 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
     bNew->onClick = []() { SceneManager::ChangeScene("STAGE"); };
     buttons.push_back(bNew);
 
-    auto bTutorial = new GuiButton(bx, by + bi, bw, bh, "遊び方");
+    auto bTutorial = new GuiButton(bx, by + bi, bw, bh, "チュートリアル");
 	bTutorial->SetImage(btnImg_tutorial);//ボタン画像を設定、なければデフォルトの四角形ボタンになる
-    bTutorial->onClick = []() { SceneManager::ChangeScene("CUSTOMCHARACTER"); };
+    bTutorial->onClick = []() { SceneManager::ChangeScene("TUTORIAL"); };
     buttons.push_back(bTutorial);
 
     auto bSet = new GuiButton(bx, by+bi*2, bw, bh, "設定");

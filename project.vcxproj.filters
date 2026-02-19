@@ -14,7 +14,7 @@
       <Filter>Scene\[01]TitleScene</Filter>
     </ClCompile>
     <ClCompile Include="Source\PlayScene.cpp">
-      <Filter>Scene\[04]PlayScene</Filter>
+      <Filter>Scene\[05]PlayScene</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\imgui.cpp">
       <Filter>ImGui</Filter>
@@ -75,19 +75,22 @@
       <Filter>Scene\SettingScene</Filter>
     </ClCompile>
     <ClCompile Include="Source\Stage.cpp">
-      <Filter>Scene\[04]PlayScene</Filter>
+      <Filter>Scene\[05]PlayScene</Filter>
     </ClCompile>
     <ClCompile Include="Source\Ball2D.cpp">
-      <Filter>Scene\[04]PlayScene</Filter>
+      <Filter>Scene\[05]PlayScene</Filter>
     </ClCompile>
     <ClCompile Include="Source\ClearScene.cpp">
       <Filter>Scene\[09]ClearScene</Filter>
     </ClCompile>
     <ClCompile Include="Source\StageGimmick.cpp">
-      <Filter>Scene\[04]PlayScene</Filter>
+      <Filter>Scene\[05]PlayScene</Filter>
     </ClCompile>
     <ClCompile Include="Source\StageSelectScene.cpp">
       <Filter>Scene\[02]StageSelect</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tutorial.cpp">
+      <Filter>Scene\[03]チュートリアル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -108,7 +111,7 @@
       <Filter>Scene\[01]TitleScene</Filter>
     </ClInclude>
     <ClInclude Include="Source\PlayScene.h">
-      <Filter>Scene\[04]PlayScene</Filter>
+      <Filter>Scene\[05]PlayScene</Filter>
     </ClInclude>
     <ClInclude Include="ImGui\imconfig.h">
       <Filter>ImGui</Filter>
@@ -179,19 +182,22 @@
       <Filter>Scene\SettingScene</Filter>
     </ClInclude>
     <ClInclude Include="Source\Stage.h">
-      <Filter>Scene\[04]PlayScene</Filter>
+      <Filter>Scene\[05]PlayScene</Filter>
     </ClInclude>
     <ClInclude Include="Source\Ball2D.h">
-      <Filter>Scene\[04]PlayScene</Filter>
+      <Filter>Scene\[05]PlayScene</Filter>
     </ClInclude>
     <ClInclude Include="Source\ClearScene.h">
       <Filter>Scene\[09]ClearScene</Filter>
     </ClInclude>
     <ClInclude Include="Source\StageGimmick.h">
-      <Filter>Scene\[04]PlayScene</Filter>
+      <Filter>Scene\[05]PlayScene</Filter>
     </ClInclude>
     <ClInclude Include="Source\StageSelectScene.h">
       <Filter>Scene\[02]StageSelect</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tutorial.h">
+      <Filter>Scene\[03]チュートリアル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -219,14 +225,17 @@
     <Filter Include="Scene\[09]ClearScene">
       <UniqueIdentifier>{429c8176-0542-4701-b889-4f7e2a2d1b31}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scene\[04]PlayScene">
-      <UniqueIdentifier>{8123ada4-16d1-40da-a8f3-3f9e93aafb30}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scene\[02]StageSelect">
       <UniqueIdentifier>{6db9443c-4271-4d94-bec8-52797f65d359}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scene\[03]Load">
+    <Filter Include="Scene\[03]チュートリアル">
+      <UniqueIdentifier>{3eee790f-f386-433b-b11a-5a8ce755be0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\[04]Load">
       <UniqueIdentifier>{a48a6d86-684c-4a2c-ba59-2c5c0a4cf76d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\[05]PlayScene">
+      <UniqueIdentifier>{8123ada4-16d1-40da-a8f3-3f9e93aafb30}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

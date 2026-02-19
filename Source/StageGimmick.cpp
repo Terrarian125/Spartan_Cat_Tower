@@ -4,14 +4,28 @@
 #include "../Library/SceneManager.h"
 #include <math.h>
 #include <string>
+#include <DxLib.h> // SetDrawBlendMode 等のために必要
 
-StageGimmick::StageGimmick() {}
+StageGimmick::StageGimmick() {
+    isGoalStarted = false;
+    fadeAlpha = 0.0f;
+}
 
 void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool isPlayer, bool isDownPressed, float moveInput, int voiceHandle, Ball2D* pBall) {
     Stage* stage = FindGameObject<Stage>();
     if (!stage) return;
 
-    //入力、重力、氷の摩擦計算
+    // --- ゴール演出中の処理 ---
+    if (isGoalStarted) {
+        fadeAlpha += fadeSpeed;
+        if (fadeAlpha >= 255.0f) {
+            fadeAlpha = 255.0f;
+            SceneManager::ChangeScene("CLEAR");
+        }
+        // フェード中は物理演算を止める、または移動を制限したい場合はここで return しても良い
+    }
+
+    // 入力、重力、氷の摩擦計算
     if (isPlayer) {
         if (stage->GetTileFunction(pos.x, pos.y + radius + 1) == "ICE") {
             vel.x += moveInput * 0.2f;
@@ -26,12 +40,11 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
     vel.y += G;
     if (!isPlayer) vel.x *= 0.95f;
 
-    //水平移動と段差乗り越え判定
+    // 水平移動
     float oldX = pos.x;
     pos.x += vel.x;
 
     std::string frontAttr = stage->GetTileFunction(pos.x + (vel.x > 0 ? radius : -radius), pos.y + radius - 5.0f);
-
     if (frontAttr == "SOLID") {
         if (stage->GetTileFunction(pos.x, pos.y - radius) == "NONE") {
             pos.y -= 8.0f;
@@ -42,47 +55,44 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
         }
     }
 
-    //垂直移動
+    // 垂直移動
     pos.y += vel.y;
 
-    //足元の属性確認
+    // 属性確認
     float footX = pos.x;
     float footY = pos.y + radius;
     std::string attr = stage->GetTileFunction(footX, footY);
-    std::string centerAttr = stage->GetTileFunction(pos.x, pos.y); //ゴールは足元ではなく中心を見る
+    std::string centerAttr = stage->GetTileFunction(pos.x, pos.y);
 
-    if (centerAttr == "GOAL") {
+    // --- ゴール判定の修正 ---
+    if (centerAttr == "GOAL" && !isGoalStarted) {
         if (pBall && isPlayer) {
             Ball2D* partner = pBall->GetPartner();
             if (partner) {
                 Ball2D::lastTotalDamage = partner->GetDamageCount();
             }
-            SceneManager::ChangeScene("CLEAR");
+            isGoalStarted = true; // 即座にChangeSceneせず、フラグを立てる
             return;
         }
     }
 
-    //トゲ床（SPIKE）の処理
-    //四方のタイルをチェック
-    if (stage->GetTileFunction(pos.x, pos.y + radius) == "SPIKE" || //足元
-        stage->GetTileFunction(pos.x, pos.y - radius) == "SPIKE" || //頭上
-        stage->GetTileFunction(pos.x + radius, pos.y) == "SPIKE" || //右横
-        stage->GetTileFunction(pos.x - radius, pos.y) == "SPIKE")   //左横
+    // トゲ床（SPIKE）の処理
+    if (stage->GetTileFunction(pos.x, pos.y + radius) == "SPIKE" ||
+        stage->GetTileFunction(pos.x, pos.y - radius) == "SPIKE" ||
+        stage->GetTileFunction(pos.x + radius, pos.y) == "SPIKE" ||
+        stage->GetTileFunction(pos.x - radius, pos.y) == "SPIKE")
     {
         if (pBall) {
-            pBall->OnDamage(); //ここで痛い顔（3秒）とカウントが走る
-
-            //反動：ぶつかった方向の逆に弾き飛ばす
+            pBall->OnDamage();
             vel.y = -10.0f;
             if (stage->GetTileFunction(pos.x + radius, pos.y) == "SPIKE") vel.x = -15.0f;
             if (stage->GetTileFunction(pos.x - radius, pos.y) == "SPIKE") vel.x = 15.0f;
-
-            pos.y -= 5.0f; //めり込み防止
-            return;        //物理処理を中断して跳ね返りを優先
+            pos.y -= 5.0f;
+            return;
         }
     }
 
-    //坂道吸着の処理
+    // 坂道吸着の処理
     if (attr == "SLOPE_R" || attr == "SLOPE_L") {
         float localX = fmod(footX, TILE_SIZE);
         if (localX < 0) localX += TILE_SIZE;
@@ -96,7 +106,7 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
             vel.y = 0;
         }
     }
-    //着地判定
+    // 着地判定
     else if (attr == "SOLID" || attr == "SPRING" || attr == "ICE" || attr == "ONE_WAY" || attr == "SPIKE") {
         bool isLanding = false;
         float tileTopY = floor(footY / TILE_SIZE) * TILE_SIZE;
@@ -120,5 +130,15 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
                 vel.y = 0;
             }
         }
+    }
+}
+
+// フェード描画の実装
+void StageGimmick::DrawFade() {
+    if (fadeAlpha > 0.0f) {
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)fadeAlpha);
+        // 画面全体を黒く塗る（サイズは環境に合わせて1280, 720等に変更してください）
+        DrawFillBox(0, 0, 1280, 720, GetColor(0, 0, 0));
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
 }
