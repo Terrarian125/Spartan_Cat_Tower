@@ -92,6 +92,9 @@
     <ClCompile Include="Source\Tutorial.cpp">
       <Filter>Scene\[03]チュートリアル</Filter>
     </ClCompile>
+    <ClCompile Include="Source\LoadScene.cpp">
+      <Filter>Scene\[04]Load</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Screen.h" />
@@ -198,6 +201,9 @@
     </ClInclude>
     <ClInclude Include="Source\Tutorial.h">
       <Filter>Scene\[03]チュートリアル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LoadScene.h">
+      <Filter>Scene\[04]Load</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

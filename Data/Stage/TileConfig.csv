@@ -7,8 +7,8 @@ ID,ImagePath,AnimCount,Function,Description
 7,ice.png,1,ICE,滑る床
 8,spike.png,1,SPIKE,とげ床
 9,invisible.png,1,SOLID,透明な壁
-,,,,
-,,,,
+10,T1.png,1,SPRING,トランポリン左
+11,T2.png,1,SPRING,トランポリン右
 ,,,,
 ,,,,
 ,,,,

@@ -9,6 +9,7 @@
 #include "ClearScene.h"
 #include "StageSelectScene.h"
 #include "Tutorial.h"
+#include "LoadScene.h"
 
 
 SceneBase* SceneFactory::CreateFirst(){
@@ -36,6 +37,9 @@ SceneBase * SceneFactory::Create(const std::string & name){
 	}
 	if (name == "TUTORIAL") {
 		return new TutorialScene();
+	}
+	if (name == "LOAD") {
+		return new LoadScene();
 	}
 
 

@@ -30,6 +30,7 @@
 ////　bSet->onClick = [this]() { this->mySettingPanel->SetVisible(true); };//設定パネルを表示する例
 ////　buttons.push_back(bSet);
 ///------------------------------------------------------------
+/// 作成：240169 GE2A33 髙橋
 /// </summary>
 
 class GuiButton : public GameObject {
