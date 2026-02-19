@@ -34,7 +34,7 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
 
     auto bNew = new GuiButton(bx, by, bw, bh, "ゲームスタート！");
 	bNew->SetImage(btnImg_new);//ボタン画像を設定、なければデフォルトの四角形ボタンになる
-    bNew->onClick = []() { SceneManager::ChangeScene("PLAY"); };
+    bNew->onClick = []() { SceneManager::ChangeScene("STAGE"); };
     buttons.push_back(bNew);
 
     auto bTutorial = new GuiButton(bx, by + bi, bw, bh, "遊び方");

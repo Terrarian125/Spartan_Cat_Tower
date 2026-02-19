@@ -7,6 +7,7 @@
 #include "PlayScene.h"
 #include "SettingScene.h"
 #include "ClearScene.h"
+#include "StageSelectScene.h"
 
 
 SceneBase* SceneFactory::CreateFirst(){
@@ -29,6 +30,10 @@ SceneBase * SceneFactory::Create(const std::string & name){
 	if (name == "SETTING") {
 		return new SettingScene();
 	}
+	if (name == "STAGE") {
+		return new StageSelectScene();
+	}
+
 
 	//if (name == ""){
 	//	return new ();

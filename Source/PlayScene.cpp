@@ -1,12 +1,14 @@
 #include "PlayScene.h"
 #include "Stage.h"
 #include "Ball2D.h"
+#include "../Library/Input.h"
 
 PlayScene::PlayScene() { Init(); }
 PlayScene::~PlayScene() {}
 
 void PlayScene::Init() {
-    Stage* stage = new Stage("Data/Stage/TileConfig.csv", "Data/Stage/stage02.csv");
+    Stage* stage = new Stage("Data/Stage/TileConfig.csv", Stage::nextMapPath);
+    ObjectManager::Push(stage);
 
     Ball2D* player = new Ball2D(GetColor(255, 200, 0), true);
     Ball2D* partner = new Ball2D(GetColor(100, 200, 255), false);
@@ -17,7 +19,12 @@ void PlayScene::Init() {
     player->SetPartner(partner);
 }
 
-void PlayScene::Update() {}
+void PlayScene::Update() {
+    if (Input::IsKeyDown(KEY_INPUT_ESCAPE)) {
+		SceneManager::ChangeScene("STAGE");
+        return;
+    }
+}
 void PlayScene::Draw() {
     //DrawString(10, 10, "A D: Move / Space: Jump", GetColor(255, 255, 255));
 }

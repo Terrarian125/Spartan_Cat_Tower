@@ -21,6 +21,10 @@ public:
     // ダメージ回数を取得する関数
     int GetDamageCount() const { return damageCount; }
 
+	static int lastTotalDamage; // クリアシーンで表示するための静的変数
+
+    Ball2D* GetPartner() const { return partner; }
+
     float mass;
 
 private:

@@ -4,7 +4,9 @@
 #include "../Source/Screen.h"
 #include <math.h>
 
-// コンストラクタ：設定ファイルとマップファイルを読み込む
+std::string Stage::nextMapPath = "Data/Stage/stage01.csv";
+
+//コンストラクタ：設定ファイルとマップファイルを読み込む
 Stage::Stage(std::string configPath, std::string mapPath) {
     SetDrawOrder(100);
     scroll = VECTOR2(0, 0);
@@ -14,15 +16,15 @@ Stage::Stage(std::string configPath, std::string mapPath) {
     LoadMap(mapPath);
 }
 
-// TileConfig.csv を読み込んでタイルの「カタログ」を作成する
+//TileConfig.csv を読込
 void Stage::LoadConfig(std::string path) {
     CsvReader csv(path);
     if (csv.GetLines() <= 0) return;
 
-    // 1行目はヘッダーなので i=1 から開始
+    //1行目はヘッダーなので i=1 から開始
     for (int i = 1; i < csv.GetLines(); i++) {
         int id = csv.GetInt(i, 0);
-        // 画像読み込み場所を Data/Image/ に指定
+        //画像読み込み場所を Data/Image/ に指定
         std::string imgPath = "Data/Image/" + csv.GetString(i, 1);
         int anim = csv.GetInt(i, 2);
         std::string functionName = csv.GetString(i, 3);
@@ -31,35 +33,35 @@ void Stage::LoadConfig(std::string path) {
         data.animCount = (anim <= 0) ? 1 : anim;
         data.func = functionName;
 
-        // ハンドルを初期化
+        //ハンドルを初期化
         for (int j = 0; j < 16; j++) data.handles[j] = -1;
 
         if (data.animCount <= 1) {
             data.handles[0] = LoadGraph(imgPath.c_str());
         }
         else {
-            // 横並びのスプライトシートとして分割読み込み
+            //横並びのスプライトシートとして分割読み込み
             LoadDivGraph(imgPath.c_str(), data.animCount, data.animCount, 1, (int)TILE_SIZE, (int)TILE_SIZE, data.handles);
         }
         catalog[id] = data;
     }
 }
 
-// stageXX.csv を読み込んでマップ配置データを作成する
+//stageXX.csv を読み込んでマップ配置データを作成する
 void Stage::LoadMap(std::string path) {
     CsvReader csv(path);
     mapData.clear();
-    bgHandle = -1; // 背景ハンドルをリセット
+    bgHandle = -1; //背景ハンドルをリセット
     if (csv.GetLines() <= 0) return;
 
     int startLine = 0;
 
-    // 1行目が背景設定（BG）かどうかを判定
+    //1行目が背景設定（BG）かどうかを判定
     if (csv.GetString(0, 0) == "BG") {
         std::string bgName = csv.GetString(0, 1);
         std::string bgPath = "Data/Image/" + bgName;
         bgHandle = LoadGraph(bgPath.c_str());
-        // 2行目からがマップデータなので開始行をずらす
+        //2行目からがマップデータなので開始行をずらす
         startLine = 1;
     }
 
@@ -69,7 +71,7 @@ void Stage::LoadMap(std::string path) {
             int val = csv.GetInt(i, j);
             row.push_back(val);
 
-            // プレイヤーのスタート位置（マップデータの行番号に合わせるため i - startLine）
+            //プレイヤーのスタート位置（マップデータの行番号に合わせるため i - startLine）
             if (val == 1) {
                 startPos = VECTOR2(j * TILE_SIZE + TILE_SIZE / 2.0f, (i - startLine) * TILE_SIZE + TILE_SIZE / 2.0f);
             }
@@ -78,7 +80,7 @@ void Stage::LoadMap(std::string path) {
     }
 }
 
-// 指定座標にあるタイルの「機能名」を返す（Ball2Dの判定で使用）
+//指定座標にあるタイルの「機能名」を返す（Ball2Dの判定で使用）
 std::string Stage::GetTileFunction(float px, float py) {
     int tx = (int)(px / TILE_SIZE);
     int ty = (int)(py / TILE_SIZE);
@@ -92,7 +94,7 @@ std::string Stage::GetTileFunction(float px, float py) {
 }
 
 void Stage::Update() {
-    // プレイヤーの位置に合わせてスクロール座標を更新
+    //プレイヤーの位置に合わせてスクロール座標を更新
     Ball2D* player = FindGameObject<Ball2D>();
     if (player) {
         scroll.x = player->GetPosition().x - (Screen::WIDTH / 2.0f);
@@ -101,16 +103,16 @@ void Stage::Update() {
 }
 
 void Stage::Draw() {
-    // 最初に背景を描画（一番奥）
+    //最初に背景を描画（一番奥）
     if (bgHandle != -1) {
-        // 画面全体に描画する場合（スクロールさせない固定背景）
+        //画面全体に描画する場合（スクロールさせない固定背景）
         DrawGraph(0, 0, bgHandle, FALSE);
 
-        // もし背景もスクロールさせたい場合は以下
-        // DrawGraph((int)(-scroll.x * 0.5f), (int)(-scroll.y * 0.5f), bgHandle, FALSE);
+        //もし背景もスクロールさせたい場合は以下
+        //DrawGraph((int)(-scroll.x * 0.5f), (int)(-scroll.y * 0.5f), bgHandle, FALSE);
     }
 
-    // 150ミリ秒ごとにアニメーションのコマを進める
+    //150ミリ秒ごとにアニメーションのコマを進める
     int animIndex = (GetNowCount() / 150);
 
     for (int y = 0; y < (int)mapData.size(); y++) {

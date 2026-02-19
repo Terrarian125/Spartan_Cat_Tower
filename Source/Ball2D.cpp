@@ -4,6 +4,8 @@
 #include "../Library/CsvReader.h"
 #include <math.h>
 
+int Ball2D::lastTotalDamage = 0;
+
 Ball2D::Ball2D(unsigned int _color, bool _isPlayer) : color(_color), isPlayer(_isPlayer) {
     SetDrawOrder(50);
     position = VECTOR2(0, 0);
@@ -18,11 +20,11 @@ Ball2D::Ball2D(unsigned int _color, bool _isPlayer) : color(_color), isPlayer(_i
 void Ball2D::LoadParam(std::string path) {
     CsvReader csv(path);
 
-    // デフォルト値
+    //デフォルト値
     RADIUS = 25.0f; G = 0.5f; SPEED = 0.6f;
     SPRING_L = 250.0f; K = 0.08f; mass = 1.0f;
     BUMP_MAX_LIFE = 120.0f;
-    float tempHeight = 250.0f; // CSVのJumpHeightの初期値
+    float tempHeight = 250.0f; //CSVのJumpHeightの初期値
 
     if (csv.GetLines() <= 0) return;
 
@@ -35,7 +37,7 @@ void Ball2D::LoadParam(std::string path) {
             if ((isPlayer && name == "PlayerImage") || (!isPlayer && name == "PartnerImage")) {
                 hImage = LoadGraph(("Data/Image/" + fileName).c_str());
             }
-            continue; // 数値変換させない
+            continue; //数値変換させない
         }
         if (name == "PartnerDamageImage") {
             if (!isPlayer) {
@@ -51,21 +53,21 @@ void Ball2D::LoadParam(std::string path) {
         }
 
         //ここから数値変換が必要な項目 
-        // GetFloatを呼ぶ前に、値が空でないか、数値っぽいかを確認するのが安全
+        //GetFloatを呼ぶ前に、値が空でないか、数値っぽいかを確認するのが安全
         float val = (float)csv.GetFloat(i, 1);
 
-		if (name == "Radius")           RADIUS = val;// 半径
-		else if (name == "Gravity")     G = val;// 重力加速度
-		else if (name == "MoveSpeed")   SPEED = val;// 移動速度
-		else if (name == "JumpHeight")  tempHeight = val;// ジャンプの高さ（初速計算用）
-		else if (name == "BumpLife")    BUMP_MAX_LIFE = val;// バンプエフェクトの最大寿命
-		else if (name == "SpringLength") SPRING_L = val;// 紐の自然長
-		else if (name == "SpringK")      K = val;// バネ定数
-		else if (isPlayer && name == "MassPlayer")    mass = val;// プレイヤー用の質量
-		else if (!isPlayer && name == "MassPartner")  mass = val;// パートナー用の質量
+		if (name == "Radius")           RADIUS = val;//半径
+		else if (name == "Gravity")     G = val;//重力加速度
+		else if (name == "MoveSpeed")   SPEED = val;//移動速度
+		else if (name == "JumpHeight")  tempHeight = val;//ジャンプの高さ（初速計算用）
+		else if (name == "BumpLife")    BUMP_MAX_LIFE = val;//バンプエフェクトの最大寿命
+		else if (name == "SpringLength") SPRING_L = val;//紐の自然長
+		else if (name == "SpringK")      K = val;//バネ定数
+		else if (isPlayer && name == "MassPlayer")    mass = val;//プレイヤー用の質量
+		else if (!isPlayer && name == "MassPartner")  mass = val;//パートナー用の質量
     }
 
-    // 重力からジャンプ初速を計算
+    //重力からジャンプ初速を計算
     if (G > 0) JUMP = -sqrtf(2.0f * G * tempHeight);
     else JUMP = -10.0f;
 }
@@ -74,53 +76,62 @@ void Ball2D::Update() {
     Stage* stage = FindGameObject<Stage>();
     if (!stage) return;
 
-    // 初回の更新時にリセット用の初期位置を保存します
+    //判定用の変数を先に宣言・初期化する
+    float moveInput = 0;
+    bool isDownPressed = false;
+    VECTOR2 oldVelocity = velocity; //更新前の速度を保存（激突判定用）
+
+    //初回の更新時にリセット用の初期位置を保存
     static bool isFirstUpdate = true;
     if (isFirstUpdate) {
         startPosition = position;
         isFirstUpdate = false;
     }
 
-    // エスケープキーが押されたら自分とパートナーの位置を初期状態に戻します
-    if (Input::IsKeyDown(KEY_INPUT_ESCAPE)) {
-        ResetPosition();
-        if (partner) partner->ResetPosition();
-        return;
-    }
-
-    float moveInput = 0;
-    bool isDownPressed = false;
-
-    // プレイヤー操作時の移動入力とジャンプの判定
+    //プレイヤー操作時の入力処理
     if (isPlayer) {
         if (Input::IsKeepKeyDown(KEY_INPUT_A)) moveInput -= SPEED;
         if (Input::IsKeepKeyDown(KEY_INPUT_D)) moveInput += SPEED;
         if (Input::IsKeepKeyDown(KEY_INPUT_S)) isDownPressed = true;
 
-        // 接地に近い状態であればスペースキーでジャンプ初速を与えます
         if (Input::IsKeyDown(KEY_INPUT_SPACE) && abs(velocity.y) < 1.0f) {
             velocity.y = JUMP;
         }
     }
 
-    // パートナーとの間にある紐の伸縮による物理計算
+    //パートナーとの間にある紐の物理計算
     if (isPlayer && partner) {
         VECTOR2 diff = position - partner->GetPosition();
         float dist = VSize(diff);
         if (dist > SPRING_L && dist > 0.1f) {
             float f = (dist - SPRING_L) * K;
             VECTOR2 norm = VECTOR2(diff.x / dist, diff.y / dist);
-            // 相手側へ引っ張る力を加えます
             partner->AddForce(VECTOR2(norm.x * f / partner->mass, norm.y * f / partner->mass));
         }
     }
 
-    // 重力、摩擦、移動、およびトゲ床などのギミック判定をステージギミッククラスに委託
-    // 最後に this を渡すことでギミック側から OnDamage を呼び出せるようにしています
+    //物理更新
     gimmick.SetParams(G, JUMP);
     gimmick.UpdatePhysics(position, velocity, RADIUS, isPlayer, isDownPressed, moveInput, voiceHandle, this);
 
-    // ダメージ演出用のタイマーとバンプエフェクトの残り時間を更新します
+    //ダメージ判定(落下は平気、壁激突と極端な引っ張りのみ
+    if (!isPlayer) {
+        //壁への激突判定（横方向の速度が急停止した場合）
+        if (fabsf(oldVelocity.x) > 15.0f && fabsf(velocity.x) < 1.0f) {
+            OnDamage();
+        }
+
+        //ひもの限界ダメージ（SPRING_Lのn倍以上離れたら）
+        if (partner) {
+            VECTOR2 diff = position - partner->GetPosition();
+            float dist = VSize(diff);
+			if (dist > SPRING_L * 2.0f) {//ここの３.0fは調整用の係数
+                if (painTimer <= 0) OnDamage();
+            }
+        }
+    }
+
+    //たんこぶ（bump）の更新
     if (painTimer > 0) painTimer--;
     if (bump.active) {
         if (--bump.life <= 0) bump.active = false;
@@ -128,7 +139,12 @@ void Ball2D::Update() {
 }
 
 void Ball2D::OnDamage() {
-    painTimer = (int)(BUMP_MAX_LIFE * 0.5f);
+    painTimer = 180;    //1秒間ダメージ顔
+    damageCount++;     //クリアシーン用の蓄積
+
+    //たんこぶ出現
+    bump.active = true;
+    bump.life = 120;   //2秒間たんこぶ表示
 }
 
 void Ball2D::Draw() {
@@ -156,8 +172,12 @@ void Ball2D::Draw() {
         DrawCircle((int)(dx + bump.localPos.x), (int)(dy + bump.localPos.y), (int)(12 * s), GetColor(255, 100, 100), TRUE);
     }
 
-    // 座標のデバッグ表示（オレンジ側だけで表示）
+    //座標のデバッグ表示
     if (isPlayer) {
-        DrawFormatString(10, 10, GetColor(255, 255, 0), "X:%.1f Y:%.1f", position.x, position.y);
+        DrawFormatString(10, 10, GetColor(0, 0, 0), "X:%.1f Y:%.1f", position.x, position.y);
     }
+	//ダメージ回数の表示
+	if (!isPlayer) {
+		DrawFormatString(10, 30, GetColor(0, 0, 0), "Damage: %d", damageCount);
+	}
 }
