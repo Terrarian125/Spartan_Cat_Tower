@@ -39,7 +39,7 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
         //フェード中は物理演算を止める、または移動を制限したい場合はここで return しても良い
     }
 
-    //2. その後、既存の垂直移動を適用
+    //その後、既存の垂直移動を適用
     pos.y += vel.y;
 
     //入力、重力、氷の摩擦計算
