@@ -15,7 +15,7 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
     Logo = LoadGraph("data/image/Title.png");
     Op_Music = LoadSoundMem("Data/Music/OP.mp3");
 
-    // 設定の読み込みと適用
+    //設定の読み込みと適用
     GameSetting::Load();
     GameSetting::Apply(Op_Music);
     PlaySoundMem(Op_Music, DX_PLAYTYPE_LOOP);
@@ -50,7 +50,7 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
     bExit->onClick = [this]() {
         this->isExitDialogVisible = true;
         for (auto b : this->exitButtons) b->SetActive(true);
-        this->currentSelect = 1; // ダイアログ内での初期選択をYESに
+        this->currentSelect = 1; //ダイアログ内での初期選択をYESに
         };
     buttons.push_back(bExit);
 
@@ -60,7 +60,7 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
 
     auto bYes = new GuiButton(cx - 160, cy + 50, 150, 50, "はい");
     bYes->onClick = []() { SceneManager::Exit(); };
-    bYes->SetActive(false); // 初期状態は非アクティブ
+    bYes->SetActive(false); //初期状態は非アクティブ
     exitButtons.push_back(bYes);
 
     auto bNo = new GuiButton(cx + 10, cy + 50, 150, 50, "いいえ");
@@ -68,14 +68,14 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
         this->isExitDialogVisible = false;
         for (auto b : this->exitButtons) b->SetActive(false);
         };
-    bNo->SetActive(false); // 初期状態は非アクティブ
+    bNo->SetActive(false); //初期状態は非アクティブ
     exitButtons.push_back(bNo);
 }
 
 void TitleScene::Update() {
 	//動画更新
     if (LogoBg != -1) {
-        // GetMovieStateToGraph が 1 を返している間は再生中
+        //GetMovieStateToGraph が 1 を返している間は再生中
         if (GetMovieStateToGraph(LogoBg) == 1) {
 			UpdateMovieToGraph(LogoBg);
 		}
@@ -84,7 +84,7 @@ void TitleScene::Update() {
     if (isExitDialogVisible) {
         for (auto b : exitButtons) b->Update();
 
-        // ダイアログ内のキー操作 (左右でYES/NO切り替え)
+        //ダイアログ内のキー操作 (左右でYES/NO切り替え)
         if (Input::IsKeyDown(KEY_INPUT_LEFT))  currentSelect = 0;
         if (Input::IsKeyDown(KEY_INPUT_RIGHT)) currentSelect = 1;
 
@@ -107,7 +107,7 @@ void TitleScene::Update() {
         b->Update();
     }
 
-    // メインメニューのキー操作 (上下)
+    //メインメニューのキー操作 (上下)
     if (Input::IsKeyDown(KEY_INPUT_DOWN)) currentSelect = (currentSelect + 1) % buttons.size();
     if (Input::IsKeyDown(KEY_INPUT_UP))   currentSelect = (currentSelect - 1 + (int)buttons.size()) % (int)buttons.size();
 
@@ -118,32 +118,32 @@ void TitleScene::Update() {
 }
 
 void TitleScene::Draw() {
-    // 基本背景
+    //基本背景
     //PlayMovieToGraph(LogoBg, DX_PLAYTYPE_LOOP);
     DrawExtendGraph(0, 0, 1280, 720, LogoBg, FALSE);
     DrawGraph(100, 50, Logo, TRUE);
 
-    // メインメニューボタン
+    //メインメニューボタン
     for (auto b : buttons) b->Draw();
 
-    // 設定パネル
+    //設定パネル
     mySettingPanel->Draw();
 
-    // 終了確認ダイアログの最前面描画
+    //終了確認ダイアログの最前面描画
     if (isExitDialogVisible) {
-        // 背景を暗くして操作不能感を出す
+        //背景を暗くして操作不能感を出す
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
         DrawBox(0, 0, 1280, 720, GetColor(0, 0, 0), TRUE);
         SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-        // ダイアログ外枠
+        //ダイアログ外枠
         int vx = 440, vy = 260, vw = 400, vh = 200;
         DrawBox(vx, vy, vx + vw, vy + vh, GetColor(20, 20, 40), TRUE);
         DrawBox(vx, vy, vx + vw, vy + vh, GetColor(255, 255, 255), FALSE);
 
 		DrawFormatString(vx + 95, vy + 50, GetColor(255, 255, 255), "本当にゲームを終了しますか？");
 
-        // YES/NOボタン
+        //YES/NOボタン
         for (auto b : exitButtons) b->Draw();
     }
 }
@@ -154,6 +154,6 @@ TitleScene::~TitleScene() {
     DeleteGraph(LogoBg);
     DeleteGraph(Logo);
 
-    // メモリ解放
+    //メモリ解放
     delete mySettingPanel;
 }

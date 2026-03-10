@@ -3,7 +3,7 @@
 #include <functional>
 #include <string>
 
-/// <summary>
+///<summary>
 ///簡単に使える、クリック可能なGUIボタン
 ///位置、大きさ、ラベルテキストを指定して生成します
 ///ボタン画像も設定可能です、無ければデフォルトの四角形ボタンになります
@@ -30,8 +30,8 @@
 ////　bSet->onClick = [this]() { this->mySettingPanel->SetVisible(true); };//設定パネルを表示する例
 ////　buttons.push_back(bSet);
 ///------------------------------------------------------------
-/// 作成：240169 GE2A33 髙橋
-/// </summary>
+///作成：240169 GE2A33 髙橋
+///</summary>
 
 class GuiButton : public GameObject {
 public:
@@ -41,15 +41,15 @@ public:
     void Update() override;
     void Draw() override;
 
-	void SetFocus(bool f) { isFocused = f; }// フォーカスされているかどうかを設定する関数
-	void SetActive(bool a) { active = a; }// アクティブかどうかを設定する関数
-	bool IsActive() const { return active; }// アクティブかどうかを取得する関数
-	bool IsMouseOver();// マウスオーバーしているかを判定する関数
+	void SetFocus(bool f) { isFocused = f; }//フォーカスされているかどうかを設定する関数
+	void SetActive(bool a) { active = a; }//アクティブかどうかを設定する関数
+	bool IsActive() const { return active; }//アクティブかどうかを取得する関数
+	bool IsMouseOver();//マウスオーバーしているかを判定する関数
 
-	void SetDescription(std::string desc) { description = desc; }// 説明文を設定するための関数
-	std::string GetDescription() const { return description; }// 説明文を取得するための関数
+	void SetDescription(std::string desc) { description = desc; }//説明文を設定するための関数
+	std::string GetDescription() const { return description; }//説明文を取得するための関数
 
-    // 画像を設定するための関数を追加
+    //画像を設定するための関数を追加
     void SetImage(int graphHandle) { imageHandle = graphHandle; }
 private:
     int x, y, width, height;
@@ -57,6 +57,6 @@ private:
     std::string label;
     bool isFocused;
     bool active;
-	std::string description;// 説明文用
+	std::string description;//説明文用
     int imageHandle = -1; //画像のハンドル（初期値は-1 = 画像なし）
 };

@@ -152,7 +152,7 @@ void Ball2D::OnDamage() {
                 //5回から小さくなり始め、30回で最小になる計算
                 //輝度と同じく 255 - (damageCount - 5) * 9
                 volume = 255 - (damageCount - 5) * 9;
-                if (volume < 30) volume = 30; // 完全に消えると寂しいので最低値を設定
+                if (volume < 30) volume = 30; //完全に消えると寂しいので最低値を設定
             }
 
             //ボイスの音量を変更
@@ -206,15 +206,15 @@ void Ball2D::Draw() {
 
     ////たんこぶ出現
     //if (bump.active) {
-    //    float s = bump.life / BUMP_MAX_LIFE;
-    //    DrawCircle((int)(dx + bump.localPos.x), (int)(dy + bump.localPos.y), (int)(12 * s), GetColor(255, 100, 100), TRUE);
+    //   float s = bump.life / BUMP_MAX_LIFE;
+    //   DrawCircle((int)(dx + bump.localPos.x), (int)(dy + bump.localPos.y), (int)(12 * s), GetColor(255, 100, 100), TRUE);
     //}
 
-    // 座標のデバッグ表示
+    //座標のデバッグ表示
     if (isPlayer) {
         DrawFormatString(10, 10, GetColor(255, 255, 255), "X:%.1f Y:%.1f", position.x, position.y);
     }
-    // ダメージ回数の表示
+    //ダメージ回数の表示
     if (!isPlayer) {
         DrawFormatString(10, 30, GetColor(255, 255, 255), "Damage: %d", damageCount);
     }

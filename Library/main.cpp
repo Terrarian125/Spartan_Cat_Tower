@@ -1,9 +1,9 @@
-/// <summary>
-/// CoGフレームワーク
-/// WinMain()から始まります
-/// </summary>
-/// <author>N.Hanai</author>
-/// 
+///<summary>
+///CoGフレームワーク
+///WinMain()から始まります
+///</summary>
+///<author>N.Hanai</author>
+///
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #ifdef _DEBUG
@@ -23,19 +23,19 @@
 #include "../Library/GameSetting.h"
 #define CoGVersion (4.1)
 
-// プログラムは WinMain から始まります
+//プログラムは WinMain から始まります
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	SetGraphMode(Screen::WIDTH, Screen::HEIGHT, 32);
-	SetOutApplicationLogValidFlag(FALSE); // ログを出さない
+	SetOutApplicationLogValidFlag(FALSE); //ログを出さない
 
 	SetMainWindowText(Screen::WINDOW_NAME);
 	SetWindowSizeExtendRate(Screen::WINDOW_EXTEND);
-	ChangeWindowMode(Screen::WINDOW_MODE); // Windowモードの場合
+	ChangeWindowMode(Screen::WINDOW_MODE); //Windowモードの場合
 
-	if (DxLib_Init() == -1)		// ＤＸライブラリ初期化処理
+	if (DxLib_Init() == -1)		//ＤＸライブラリ初期化処理
 	{
-		return -1;			// エラーが起きたら直ちに終了
+		return -1;			//エラーが起きたら直ちに終了
 	}
 	SetDrawScreen(DX_SCREEN_BACK);
 	SetAlwaysRunFlag(TRUE);
@@ -44,12 +44,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	SetHookWinProc([](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT /*CALLBACK*/
 		{
-			// DxLibとImGuiのウィンドウプロシージャを両立させる
+			//DxLibとImGuiのウィンドウプロシージャを両立させる
 			SetUseHookWinProcReturnValue(FALSE);
 			return ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
 		});
 #if IMGUI
-	// ImGUI初期化
+	//ImGUI初期化
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -58,14 +58,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	io.Fonts->AddFontFromFileTTF(u8"c:\\Windows\\Fonts\\meiryo.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());	ImGui_ImplDXlib_Init();
 #endif
 	AppInit();
-	GameSetting::Load(); // 起動時に設定をロード
+	GameSetting::Load(); //起動時に設定をロード
 	while (true) {
 #if IMGUI
 		ImGui_ImplDXlib_NewFrame();
 		ImGui::NewFrame();
 #endif
 
-		// ★ キー状態更新関数を挿入
+		//★ キー状態更新関数を挿入
 		Input::KeyStateUpdate();
 		Input::MouseStateUpdate();
 
@@ -96,10 +96,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ImGui_ImplDXlib_Shutdown();
 	ImGui::DestroyContext();
 #endif
-	DxLib_End();				// ＤＸライブラリ使用の終了処理
+	DxLib_End();				//ＤＸライブラリ使用の終了処理
 #ifdef _DEBUG
 	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 	_CrtDumpMemoryLeaks();
 #endif
-	return 0;				// ソフトの終了 
+	return 0;				//ソフトの終了 
 }

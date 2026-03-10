@@ -95,6 +95,9 @@
     <ClCompile Include="Source\LoadScene.cpp">
       <Filter>Scene\[04]Load</Filter>
     </ClCompile>
+    <ClCompile Include="Source\StageEditor.cpp">
+      <Filter>Scene\Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Screen.h" />
@@ -205,6 +208,9 @@
     <ClInclude Include="Source\LoadScene.h">
       <Filter>Scene\[04]Load</Filter>
     </ClInclude>
+    <ClInclude Include="Source\StageEditor.h">
+      <Filter>Scene\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Library">
@@ -242,6 +248,9 @@
     </Filter>
     <Filter Include="Scene\[05]PlayScene">
       <UniqueIdentifier>{8123ada4-16d1-40da-a8f3-3f9e93aafb30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\Debug">
+      <UniqueIdentifier>{b7a95da4-6abe-474f-a500-6ae4f81d1012}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

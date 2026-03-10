@@ -168,6 +168,7 @@
     <ClInclude Include="Source\SettingPanel.h" />
     <ClInclude Include="Source\SettingScene.h" />
     <ClInclude Include="Source\Stage.h" />
+    <ClInclude Include="Source\StageEditor.h" />
     <ClInclude Include="Source\StageGimmick.h" />
     <ClInclude Include="Source\StageSelectScene.h" />
     <ClInclude Include="Source\TestScene.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="Source\SettingPanel.cpp" />
     <ClCompile Include="Source\SettingScene.cpp" />
     <ClCompile Include="Source\Stage.cpp" />
+    <ClCompile Include="Source\StageEditor.cpp" />
     <ClCompile Include="Source\StageGimmick.cpp" />
     <ClCompile Include="Source\StageSelectScene.cpp" />
     <ClCompile Include="Source\TestScene.cpp" />

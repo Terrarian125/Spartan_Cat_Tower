@@ -3,10 +3,12 @@
 #include "../Library/CsvReader.h"
 #include "../Source/Screen.h"
 #include <math.h>
+#include <fstream>
+#include <iostream>
 
 std::string Stage::nextMapPath = "Data/Stage/stage01.csv";
 
-//コンストラクタ：設定ファイルとマップファイルを読み込む
+//設定ファイルとマップファイルを読み込む
 Stage::Stage(std::string configPath, std::string mapPath) {
     SetDrawOrder(100);
     scroll = VECTOR2(0, 0);
@@ -14,6 +16,22 @@ Stage::Stage(std::string configPath, std::string mapPath) {
 
     LoadConfig(configPath);
     LoadMap(mapPath);
+}
+
+void Stage::SaveMap(std::string path) {
+    std::ofstream ofs(path);
+    if (!ofs) return;
+
+    //読み込み時と同じ背景設定を1行目に書き出す
+    ofs << "\"" << currentBgPath << "\",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,," << std::endl;
+
+    for (const auto& row : mapData) {
+        for (int i = 0; i < (int)row.size(); i++) {
+            ofs << row[i] << (i < (int)row.size() - 1 ? "," : "");
+        }
+        ofs << std::endl;
+    }
+    ofs.close();
 }
 
 //TileConfig.csv を読込
@@ -49,10 +67,13 @@ void Stage::LoadConfig(std::string path) {
 
 //stageXX.csv を読み込んでマップ配置データを作成する
 void Stage::LoadMap(std::string path) {
+    currentMapPath = path; //パスを記憶
     CsvReader csv(path);
-    mapData.clear();
-    bgHandle = -1; //背景ハンドルをリセット
     if (csv.GetLines() <= 0) return;
+
+    //1行目から背景情報を抽出して記憶しておく
+    std::string firstCol = csv.GetString(0, 0); //"BG,bg_stage02.png"
+    currentBgPath = firstCol;
 
     int startLine = 0;
 

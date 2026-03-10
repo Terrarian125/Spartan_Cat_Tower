@@ -1,11 +1,11 @@
 #pragma once
 #include "../Library/SceneBase.h"
 
-/// <summary>
-/// Testシーン
-/// 
+///<summary>
+///Testシーン
+///
 //
-/// </summary>
+///</summary>
 class TestScene : public SceneBase
 {
 public:
@@ -22,8 +22,8 @@ private:
 	int tSound;
 
 	////inputにうつした
-	//int Volume_2 = 128; // 255 の約 50%
-	//int Volume_4 = 64; // 255 の約 25%
+	//int Volume_2 = 128; //255 の約 50%
+	//int Volume_4 = 64; //255 の約 25%
 
 	bool screenPattern;
 };

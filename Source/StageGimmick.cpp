@@ -15,19 +15,19 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
     Stage* stage = FindGameObject<Stage>();
     if (!stage) return;
 
-  //  //透明ブロックの判定
-  //  float headY = pos.y - radius; //ボールの頭の座標　
-  //  std::string headAttr = stage->GetTileFunction(pos.x, headY + vel.y); //次のフレームの頭の位置
+  // //透明ブロックの判定
+  // float headY = pos.y - radius; //ボールの頭の座標　
+  // std::string headAttr = stage->GetTileFunction(pos.x, headY + vel.y); //次のフレームの頭の位置
 
-  //  if (headAttr == "SOLID") {
+  // if (headAttr == "SOLID") {
 		////もし頭上が透明ブロックだったら、跳ね返る処理をする
-  //      if (vel.y < 0) {
-  //          vel.y *= -0.5f; //跳ね返る
-  //          //天井にめり込まないように位置を調整
-  //          float tileBottomY = floor((headY + vel.y) / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
-  //          pos.y = tileBottomY + radius + 1.0f;
-  //      }
-  //  }
+  //     if (vel.y < 0) {
+  //         vel.y *= -0.5f; //跳ね返る
+  //         //天井にめり込まないように位置を調整
+  //         float tileBottomY = floor((headY + vel.y) / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
+  //         pos.y = tileBottomY + radius + 1.0f;
+  //     }
+  // }
 
     //ゴール演出中の処理
     if (isGoalStarted) {
