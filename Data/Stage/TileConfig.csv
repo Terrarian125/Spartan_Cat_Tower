@@ -9,10 +9,10 @@ ID,ImagePath,AnimCount,Function,Description
 9,invisible.png,1,SOLID,透明な壁
 10,T1.png,1,SPRING,トランポリン左
 11,T2.png,1,SPRING,トランポリン右
-,,,,
-,,,,
-,,,,
-,,,,
+12,K1.png,4,,S降下看板左下
+13,K2.png,4,,S降下看板左上
+14,K3.png,4,,S降下看板右下
+15,K4.png,4,,S降下看板右上
 ,,,,
 ,,,,
 ,,,,
