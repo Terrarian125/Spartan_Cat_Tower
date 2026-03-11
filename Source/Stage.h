@@ -11,10 +11,10 @@ struct TileTypeData {
     std::string func;
 };
 
-class StageEditor;
+//class StageEditor;
 
 class Stage : public GameObject {
-    friend class StageEditor;
+    //friend class StageEditor;
 public:
     //コンストラクタの引数は既存の構成を維持
     Stage(std::string configPath, std::string mapPath);

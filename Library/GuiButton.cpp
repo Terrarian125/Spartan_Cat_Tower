@@ -9,8 +9,33 @@ GuiButton::GuiButton(int _x, int _y, int _w, int _h, std::string text)
     SetDrawOrder(10);
 }
 
+GuiButton::~GuiButton() {
+    if (imageHandle != -1) {
+        DeleteGraph(imageHandle); //メモリ解放
+        imageHandle = -1;
+    }
+}
+
 void GuiButton::Update() {
     if (!active) return;
+
+    // マウスオーバー判定を取得
+    bool over = IsMouseOver();
+
+    // 動画の場合の再生制御
+    if (isMovie && imageHandle != -1) {
+        if (over || isFocused) {
+            // マウスが乗っているか、フォーカスがあれば再生
+            if (GetMovieStateToGraph(imageHandle) == 0) { // 停止中なら
+                PlayMovieToGraph(imageHandle, DX_PLAYTYPE_LOOP);
+            }
+        }
+        else {
+            // 外れたら一時停止
+            PauseMovieToGraph(imageHandle);
+            //SeekMovieToGraph(imageHandle, 0);
+        }
+    }
 
     // 前フレームでクリック処理をしたなら、このフレームはもう何もしない
     // (静的変数を使って全ボタンの二重反応を防止)

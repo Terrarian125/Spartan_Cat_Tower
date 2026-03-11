@@ -38,6 +38,7 @@ public:
     std::function<void()> onClick;
 
     GuiButton(int x, int y, int w, int h, std::string text);
+    ~GuiButton()override;
     void Update() override;
     void Draw() override;
 
@@ -49,8 +50,8 @@ public:
 	void SetDescription(std::string desc) { description = desc; }//説明文を設定するための関数
 	std::string GetDescription() const { return description; }//説明文を取得するための関数
 
-    //画像を設定するための関数を追加
-    void SetImage(int graphHandle) { imageHandle = graphHandle; }
+    void SetImage(int graphHandle) { imageHandle = graphHandle; } //画像を設定するための関数
+    void SetIsMovie(bool movie) { isMovie = movie; } //動画を設定するための関数
 private:
     int x, y, width, height;
     unsigned int color, hoverCol;
@@ -59,4 +60,5 @@ private:
     bool active;
 	std::string description;//説明文用
     int imageHandle = -1; //画像のハンドル（初期値は-1 = 画像なし）
+    bool isMovie = false;
 };

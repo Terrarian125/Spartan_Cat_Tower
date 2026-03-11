@@ -2,11 +2,11 @@
 #include "../Library/SceneBase.h"
 #include <vector>
 #include <string>
-
+class GuiButton;
 class StageSelectScene : public SceneBase {
 public:
     StageSelectScene();
-    virtual ~StageSelectScene() {}
+    virtual ~StageSelectScene();
 
     void Update() override;
     void Draw() override;
@@ -18,4 +18,7 @@ private:
 
     int fontHandle;
     int bgHandle;
+
+    //生成したボタンを保持するリスト
+    std::vector<GuiButton*> buttons;
 };

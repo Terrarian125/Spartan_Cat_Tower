@@ -29,24 +29,28 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
 		bh = 90,  //ボタンの高さ
 	    bi = 100; //ボタン間隔
 
-    int btnImg_new = LoadGraph("data/image/btnImg_new.png");
-	int btnImg_tutorial = LoadGraph("data/image/btnImg_tutorial.png");
+    int btnImg_bNew = LoadGraph("data/image/btnImg_bNew.png");
+	int btnImg_bTutorial = LoadGraph("data/image/btnImg_bTutorial.png"); 
+    int btnImg_bSet = LoadGraph("data/image/btnImg_bSet.png");
+    int btnImg_bExit = LoadGraph("data/image/btnImg_bExit.png");
 
     auto bNew = new GuiButton(bx, by, bw, bh, "ゲームスタート！");
-	bNew->SetImage(btnImg_new);//ボタン画像を設定、なければデフォルトの四角形ボタンになる
+	bNew->SetImage(btnImg_bNew);//ボタン画像を設定、なければデフォルトの四角形ボタンになる
     bNew->onClick = []() { SceneManager::ChangeScene("STAGE"); };
     buttons.push_back(bNew);
 
     auto bTutorial = new GuiButton(bx, by + bi, bw, bh, "チュートリアル");
-	bTutorial->SetImage(btnImg_tutorial);//ボタン画像を設定、なければデフォルトの四角形ボタンになる
+	bTutorial->SetImage(btnImg_bTutorial);//ボタン画像を設定
     bTutorial->onClick = []() { SceneManager::ChangeScene("TUTORIAL"); };
     buttons.push_back(bTutorial);
 
     auto bSet = new GuiButton(bx, by+bi*2, bw, bh, "設定");
+    bSet->SetImage(btnImg_bSet);//ボタン画像を設定
     bSet->onClick = [this]() { this->mySettingPanel->SetVisible(true); };
     buttons.push_back(bSet);
 
     auto bExit = new GuiButton(bx, by+bi*3, bw, bh, "ゲーム終了");
+    bExit->SetImage(btnImg_bExit);//ボタン画像を設定
     bExit->onClick = [this]() {
         this->isExitDialogVisible = true;
         for (auto b : this->exitButtons) b->SetActive(true);

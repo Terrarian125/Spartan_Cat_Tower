@@ -26,6 +26,12 @@
 //プログラムは WinMain から始まります
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	//FPS計測用の変数
+	int frameCount = 0;
+	int startTime = GetNowCount();
+	float fps = 0.0f;
+	char windowTitle[256];
+
 	SetGraphMode(Screen::WIDTH, Screen::HEIGHT, 32);
 	SetOutApplicationLogValidFlag(FALSE); //ログを出さない
 
@@ -60,6 +66,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	AppInit();
 	GameSetting::Load(); //起動時に設定をロード
 	while (true) {
+		//FPS計測処理
+		frameCount++;
+		int currentTime = GetNowCount();
+
+		//1秒経過ごとにFPSを更新
+		if (currentTime - startTime >= 1000) {
+			fps = (float)frameCount * 1000.0f / (float)(currentTime - startTime);
+
+			//ウィンドウ名にFPSを反映
+			sprintf_s(windowTitle, "%s  [ %.1f FPS ]", Screen::WINDOW_NAME, fps);
+			SetMainWindowText(windowTitle);
+
+			//カウンタをリセット
+			startTime = currentTime;
+			frameCount = 0;
+		}
+
 #if IMGUI
 		ImGui_ImplDXlib_NewFrame();
 		ImGui::NewFrame();
