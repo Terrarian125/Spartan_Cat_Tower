@@ -118,8 +118,15 @@ void Stage::Update() {
     //プレイヤーの位置に合わせてスクロール座標を更新
     Ball2D* player = FindGameObject<Ball2D>();
     if (player) {
-        scroll.x = player->GetPosition().x - (Screen::WIDTH / 2.0f);
-        scroll.y = player->GetPosition().y - (Screen::HEIGHT / 2.0f);
+        // 目標とするスクロール位置
+        float targetX = player->GetPosition().x - (Screen::WIDTH / 2.0f);
+        float targetY = player->GetPosition().y - (Screen::HEIGHT / 2.0f);
+
+        // 線形補間（Lerp）による追従
+        // 数値を小さくするほどゆっくり追従
+        float lerpSpeed = 0.1f;
+        scroll.x += (targetX - scroll.x) * lerpSpeed;
+        scroll.y += (targetY - scroll.y) * lerpSpeed;
     }
 }
 

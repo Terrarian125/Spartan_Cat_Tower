@@ -115,6 +115,16 @@ void Ball2D::Update() {
     gimmick.SetParams(G, JUMP);
     gimmick.UpdatePhysics(position, velocity, RADIUS, isPlayer, isDownPressed, moveInput, voiceHandle, this);
 
+	//速度の制限
+    float maxSpeedX = 10.0f; // 左右の最大速度
+    float maxSpeedY = 20.0f; // 下方向の最大速度
+
+    if (velocity.x > maxSpeedX)  velocity.x = maxSpeedX;
+    if (velocity.x < -maxSpeedX) velocity.x = -maxSpeedX;
+    if (velocity.y > maxSpeedY)  velocity.y = maxSpeedY;
+    if (velocity.y < -maxSpeedY) velocity.y = -maxSpeedY;
+
+
     //ダメージ判定(落下は平気、壁激突と極端な引っ張りのみ
     if (!isPlayer) {
         //壁への激突判定（横方向の速度が急停止した場合）
