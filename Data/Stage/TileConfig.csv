@@ -13,7 +13,7 @@ ID,ImagePath,AnimCount,Function,Description
 13,K2.png,4,,S降下看板左上
 14,K3.png,4,,S降下看板右下
 15,K4.png,4,,S降下看板右上
-,,,,
+16,Barrier.png,4,SOLID,エフェクト付き透明
 ,,,,
 ,,,,
 ,,,,
