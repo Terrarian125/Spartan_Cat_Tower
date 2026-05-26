@@ -21,4 +21,5 @@ private:
 
     //生成したボタンを保持するリスト
     std::vector<GuiButton*> buttons;
+    GuiButton* btnBack;
 };

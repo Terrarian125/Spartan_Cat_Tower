@@ -57,6 +57,12 @@ StageSelectScene::StageSelectScene() {
 
         // ボタンをシーンのオブジェクトとして追加
         ObjectManager::Push(btn);
+
+        //戻る(チュートリアルシーンと同じ)
+        auto bBack = new GuiButton(10, 620, 100, 60, "Back");
+        //bBack->SetImage(btnImg_bBack);//ボタン画像を設定
+        bBack->onClick = [this]() { SceneManager::ChangeScene("TITLE"); };
+        ObjectManager::Push(bBack);
     }
 }
 
