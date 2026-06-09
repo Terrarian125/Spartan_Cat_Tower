@@ -52,7 +52,7 @@ public:
 
     void SetImage(int graphHandle) { imageHandle = graphHandle; } //‰æ‘œ‚ğİ’è‚·‚é‚½‚ß‚ÌŠÖ”
     void SetIsMovie(bool movie) { isMovie = movie; } //“®‰æ‚ğİ’è‚·‚é‚½‚ß‚ÌŠÖ”
-private:
+
     int x, y, width, height;
     unsigned int color, hoverCol;
     std::string label;
