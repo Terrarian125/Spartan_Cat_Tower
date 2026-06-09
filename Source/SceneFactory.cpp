@@ -10,7 +10,7 @@
 #include "StageSelectScene.h"
 #include "Tutorial.h"
 #include "LoadScene.h"
-
+#include "StageBuilderScene.h"
 
 SceneBase* SceneFactory::CreateFirst(){
 	return new BootScene();
@@ -40,6 +40,9 @@ SceneBase * SceneFactory::Create(const std::string & name){
 	}
 	if (name == "LOAD") {
 		return new LoadScene();
+	}
+	if (name == "BUILDER") {
+		return new StageBuilderScene();
 	}
 
 

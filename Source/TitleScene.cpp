@@ -22,35 +22,47 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
 
     mySettingPanel = new SettingPanel();
 
-    //メインメニューのボタン配置
-	int bx = 50, //ボタンのX座標
-		by = 300, //ボタンのY座標
-		bw = 400,//ボタンの幅
-		bh = 90,  //ボタンの高さ
-	    bi = 100; //ボタン間隔
+    //メインメニューのボタン配置設定
+    int bx = 50;  //ボタンのX座標
+    int by = 200; //Y座標
+    int bw = 400; //ボタンの幅
+    int bh = 90;  //ボタンの高さ
+    int bi = 100; //ボタン間隔
 
+    //ボタン画像のロード
     int btnImg_bNew = LoadGraph("data/image/btnImg_bNew.png");
-	int btnImg_bTutorial = LoadGraph("data/image/btnImg_bTutorial.png"); 
+    int btnImg_bTutorial = LoadGraph("data/image/btnImg_bTutorial.png");
+    int btnImg_bBuilder = LoadGraph("data/image/btnImg_bBuilder.png");
     int btnImg_bSet = LoadGraph("data/image/btnImg_bSet.png");
     int btnImg_bExit = LoadGraph("data/image/btnImg_bExit.png");
 
+    //ゲームスタート
     auto bNew = new GuiButton(bx, by, bw, bh, "ゲームスタート！");
-	bNew->SetImage(btnImg_bNew);//ボタン画像を設定、なければデフォルトの四角形ボタンになる
+    bNew->SetImage(btnImg_bNew);
     bNew->onClick = []() { SceneManager::ChangeScene("STAGE"); };
     buttons.push_back(bNew);
 
+    //チュートリアル
     auto bTutorial = new GuiButton(bx, by + bi, bw, bh, "チュートリアル");
-	bTutorial->SetImage(btnImg_bTutorial);//ボタン画像を設定
+    bTutorial->SetImage(btnImg_bTutorial);
     bTutorial->onClick = []() { SceneManager::ChangeScene("TUTORIAL"); };
     buttons.push_back(bTutorial);
 
-    auto bSet = new GuiButton(bx, by+bi*2, bw, bh, "設定");
-    bSet->SetImage(btnImg_bSet);//ボタン画像を設定
+    //ステージビルダー
+    auto bBuilder = new GuiButton(bx, by + bi * 2, bw, bh, "ステージエディター");
+    bBuilder->SetImage(btnImg_bBuilder);
+    bBuilder->onClick = []() { SceneManager::ChangeScene("BUILDER"); }; //遷移先シーン名はプロジェクトの設定に合わせて調整してください
+    buttons.push_back(bBuilder);
+
+    //設定
+    auto bSet = new GuiButton(bx, by + bi * 3, bw, bh, "設定");
+    bSet->SetImage(btnImg_bSet);
     bSet->onClick = [this]() { this->mySettingPanel->SetVisible(true); };
     buttons.push_back(bSet);
 
-    auto bExit = new GuiButton(bx, by+bi*3, bw, bh, "ゲーム終了");
-    bExit->SetImage(btnImg_bExit);//ボタン画像を設定
+    //ゲーム終了
+    auto bExit = new GuiButton(bx, by + bi * 4, bw, bh, "ゲーム終了");
+    bExit->SetImage(btnImg_bExit);
     bExit->onClick = [this]() {
         this->isExitDialogVisible = true;
         for (auto b : this->exitButtons) b->SetActive(true);
@@ -77,13 +89,13 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
 }
 
 void TitleScene::Update() {
-	//動画更新
+    //動画更新
     if (LogoBg != -1) {
-        //GetMovieStateToGraph が 1 を返している間は再生中
         if (GetMovieStateToGraph(LogoBg) == 1) {
-			UpdateMovieToGraph(LogoBg);
-		}
-	}
+            UpdateMovieToGraph(LogoBg);
+        }
+    }
+
     //終了確認ダイアログ表示中
     if (isExitDialogVisible) {
         for (auto b : exitButtons) b->Update();
@@ -111,7 +123,7 @@ void TitleScene::Update() {
         b->Update();
     }
 
-    //メインメニューのキー操作 (上下)
+    //メインメニューのキー操作 (上下) - buttons.size() を使用しているため、5択に自動拡張されます
     if (Input::IsKeyDown(KEY_INPUT_DOWN)) currentSelect = (currentSelect + 1) % buttons.size();
     if (Input::IsKeyDown(KEY_INPUT_UP))   currentSelect = (currentSelect - 1 + (int)buttons.size()) % (int)buttons.size();
 
@@ -123,7 +135,6 @@ void TitleScene::Update() {
 
 void TitleScene::Draw() {
     //基本背景
-    //PlayMovieToGraph(LogoBg, DX_PLAYTYPE_LOOP);
     DrawExtendGraph(0, 0, 1280, 720, LogoBg, FALSE);
     DrawGraph(100, 50, Logo, TRUE);
 
@@ -145,7 +156,7 @@ void TitleScene::Draw() {
         DrawBox(vx, vy, vx + vw, vy + vh, GetColor(20, 20, 40), TRUE);
         DrawBox(vx, vy, vx + vw, vy + vh, GetColor(255, 255, 255), FALSE);
 
-		DrawFormatString(vx + 95, vy + 50, GetColor(255, 255, 255), "本当にゲームを終了しますか？");
+        DrawFormatString(vx + 95, vy + 50, GetColor(255, 255, 255), "本当にゲームを終了しますか？");
 
         //YES/NOボタン
         for (auto b : exitButtons) b->Draw();
