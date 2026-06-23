@@ -18,7 +18,7 @@ private:
 
     int fontHandle;
     int bgHandle;
-	int titleUiHandle; // タイトルUI画像のハンドル
+	int titleUiHandle; //タイトルUI画像のハンドル
 
     //生成したボタンを保持するリスト
     std::vector<GuiButton*> buttons;

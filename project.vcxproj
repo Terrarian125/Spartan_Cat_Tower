@@ -159,12 +159,20 @@
     <ClInclude Include="Library\Time.h" />
     <ClInclude Include="Source\Ball2D.h" />
     <ClInclude Include="Source\BootScene.h" />
+    <ClInclude Include="Source\BrushTool.h" />
+    <ClInclude Include="Source\BuilderToolBase.h" />
     <ClInclude Include="Source\ClearScene.h" />
+    <ClInclude Include="Source\CopyTool.h" />
+    <ClInclude Include="Source\EraserTool.h" />
+    <ClInclude Include="Source\FillTool.h" />
     <ClInclude Include="Source\global.h" />
     <ClInclude Include="Source\LoadScene.h" />
+    <ClInclude Include="Source\MoveTool.h" />
+    <ClInclude Include="Source\PasteTool.h" />
     <ClInclude Include="Source\Screen.h" />
     <ClInclude Include="Source\PlayScene.h" />
     <ClInclude Include="Source\SceneFactory.h" />
+    <ClInclude Include="Source\SelectTool.h" />
     <ClInclude Include="Source\SettingPanel.h" />
     <ClInclude Include="Source\SettingScene.h" />
     <ClInclude Include="Source\Stage.h" />
@@ -173,8 +181,10 @@
     <ClInclude Include="Source\StageGimmick.h" />
     <ClInclude Include="Source\StageSelectScene.h" />
     <ClInclude Include="Source\TestScene.h" />
+    <ClInclude Include="Source\TileStrokeCommand.h" />
     <ClInclude Include="Source\TitleScene.h" />
     <ClInclude Include="Source\Tutorial.h" />
+    <ClInclude Include="Source\UndoRedoManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -196,11 +206,19 @@
     <ClCompile Include="Library\Time.cpp" />
     <ClCompile Include="Source\Ball2D.cpp" />
     <ClCompile Include="Source\BootScene.cpp" />
+    <ClCompile Include="Source\BrushTool.cpp" />
+    <ClCompile Include="Source\BuilderToolBase.cpp" />
     <ClCompile Include="Source\ClearScene.cpp" />
+    <ClCompile Include="Source\CopyTool.cpp" />
+    <ClCompile Include="Source\EraserTool.cpp" />
+    <ClCompile Include="Source\FillTool.cpp" />
     <ClCompile Include="Source\LoadScene.cpp" />
+    <ClCompile Include="Source\MoveTool.cpp" />
+    <ClCompile Include="Source\PasteTool.cpp" />
     <ClCompile Include="Source\PlayScene.cpp" />
     <ClCompile Include="Source\newFile.cpp" />
     <ClCompile Include="Source\SceneFactory.cpp" />
+    <ClCompile Include="Source\SelectTool.cpp" />
     <ClCompile Include="Source\SettingPanel.cpp" />
     <ClCompile Include="Source\SettingScene.cpp" />
     <ClCompile Include="Source\Stage.cpp" />
@@ -211,6 +229,7 @@
     <ClCompile Include="Source\TestScene.cpp" />
     <ClCompile Include="Source\TitleScene.cpp" />
     <ClCompile Include="Source\Tutorial.cpp" />
+    <ClCompile Include="Source\UndoRedoManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

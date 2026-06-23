@@ -101,6 +101,33 @@
     <ClCompile Include="Source\StageBuilderScene.cpp">
       <Filter>Scene\[10]StageBuilder</Filter>
     </ClCompile>
+    <ClCompile Include="Source\BuilderToolBase.cpp">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SelectTool.cpp">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\BrushTool.cpp">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EraserTool.cpp">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FillTool.cpp">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UndoRedoManager.cpp">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CopyTool.cpp">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PasteTool.cpp">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MoveTool.cpp">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Screen.h" />
@@ -215,6 +242,36 @@
       <Filter>Scene\Debug</Filter>
     </ClInclude>
     <ClInclude Include="Source\StageBuilderScene.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\BuilderToolBase.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\TileStrokeCommand.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SelectTool.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\BrushTool.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EraserTool.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FillTool.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MoveTool.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CopyTool.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PasteTool.h">
+      <Filter>Scene\[10]StageBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\UndoRedoManager.h">
       <Filter>Scene\[10]StageBuilder</Filter>
     </ClInclude>
   </ItemGroup>
