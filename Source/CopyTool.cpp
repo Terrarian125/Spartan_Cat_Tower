@@ -1,3 +1,4 @@
+//
 #include "CopyTool.h"
 #include <Windows.h>
 #include <sstream>

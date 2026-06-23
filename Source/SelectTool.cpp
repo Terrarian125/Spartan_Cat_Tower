@@ -1,4 +1,4 @@
-//範囲選択
+//範囲選択 
 #include "SelectTool.h"
 #include <DxLib.h>
 #include <algorithm>

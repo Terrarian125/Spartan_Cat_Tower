@@ -1,4 +1,4 @@
-//消しゴム
+//消しゴム 
 #include "EraserTool.h"
 #include "TileStrokeCommand.h"
 #include "../Library/Input.h"

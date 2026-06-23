@@ -1,3 +1,4 @@
+//
 #include "PasteTool.h"
 #include "TileStrokeCommand.h"
 #include <Windows.h>
