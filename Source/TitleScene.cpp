@@ -49,9 +49,9 @@ TitleScene::TitleScene() : currentSelect(0), isExitDialogVisible(false) {
     buttons.push_back(bTutorial);
 
     //ステージビルダー
-    auto bBuilder = new GuiButton(bx, by + bi * 2, bw, bh, "ステージエディター");
+    auto bBuilder = new GuiButton(bx, by + bi * 2, bw, bh, "ステージビルダー");
     bBuilder->SetImage(btnImg_bBuilder);
-    bBuilder->onClick = []() { SceneManager::ChangeScene("BUILDER"); }; //遷移先シーン名はプロジェクトの設定に合わせて調整してください
+    bBuilder->onClick = []() { SceneManager::ChangeScene("BUILDER"); };
     buttons.push_back(bBuilder);
 
     //設定

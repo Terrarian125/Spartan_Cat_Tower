@@ -195,8 +195,8 @@ void StageSelectScene::Draw() {
     //背景の描画
     if (bgHandle != -1) DrawGraph(0, 0, bgHandle, FALSE);
 
-    //タイトルUI画像の描画 (透過処理を TRUE に設定)
-    if (titleUiHandle != -1) {
-        DrawGraph(100, 50, titleUiHandle, TRUE);
-    }
+    ////タイトルUI画像の描画 (透過処理を TRUE に設定)
+    //if (titleUiHandle != -1) {
+    //    DrawGraph(100, 50, titleUiHandle, TRUE);
+    //}
 }
