@@ -1,4 +1,4 @@
-﻿//
+﻿//StageBuilderScene.cpp
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -14,7 +14,7 @@
 StageBuilderScene::StageBuilderScene() {
     gridData.resize(GRID_ROWS, std::vector<int>(GRID_COLS, 0));
 
-    // 個別インスタンスの生成
+    //個別インスタンスの生成 (TILE_SIZE=64 が渡されます)
     brushTool = std::make_unique<BrushTool>(gridStartX, gridStartY, TILE_SIZE, GRID_COLS, GRID_ROWS);
     eraserTool = std::make_unique<EraserTool>(gridStartX, gridStartY, TILE_SIZE, GRID_COLS, GRID_ROWS);
     selectTool = std::make_unique<SelectTool>(gridStartX, gridStartY, TILE_SIZE, GRID_COLS, GRID_ROWS);
@@ -53,7 +53,12 @@ StageBuilderScene::StageBuilderScene() {
         int bx = startX + col * (btnSize + gap), by = startY + row * (btnSize + gap);
         int tileId = availableTiles[i].id;
         auto btn = new GuiButton(bx, by, btnSize, btnSize, "");
-        if (availableTiles[i].imageHandle != -1) btn->SetImage(availableTiles[i].imageHandle);
+
+        //パレットボタンもアニメーションの最初の1コマだけをトリミングして表示
+        if (availableTiles[i].imageHandle != -1) {
+            btn->SetImage(availableTiles[i].imageHandle);
+        }
+
         btn->onClick = [this, tileId]() { selectedTileId = tileId; currentMode = EditMode::BRUSH; selectTool->Reset(); };
         paletteButtons.push_back(btn);
         ObjectManager::Push(btn);
@@ -86,6 +91,9 @@ void StageBuilderScene::Update() {
 }
 
 void StageBuilderScene::Draw() {
+	//アニメーションの現在のフレームを計算する（200msごとに切り替え）
+    int currentAnimFrame = (GetNowCount() / 200); 
+
     for (int r = 0; r < GRID_ROWS; r++) {
         for (int c = 0; c < GRID_COLS; c++) {
             int x = gridStartX + c * TILE_SIZE, y = gridStartY + r * TILE_SIZE;
@@ -93,7 +101,20 @@ void StageBuilderScene::Draw() {
             int tileId = gridData[r][c];
             if (tileId != 0) {
                 auto it = std::find_if(availableTiles.begin(), availableTiles.end(), [tileId](const BuilderTile& t) { return t.id == tileId; });
-                if (it != availableTiles.end() && it->imageHandle != -1) DrawGraph(x, y, it->imageHandle, TRUE);
+                if (it != availableTiles.end() && it->imageHandle != -1) {
+
+                    //アニメーション画像の切り出し描画処理
+                    int imgW, imgH;
+                    GetGraphSize(it->imageHandle, &imgW, &imgH);
+                    int srcTileW = imgW / it->animCount; //1コマあたりの元の画像幅
+
+					//エディタ上でアニメーションさせないなら、currentAnimFrame = 0
+                    int frameIndex = currentAnimFrame % it->animCount;
+                    int srcX = frameIndex * srcTileW;
+
+                    //元画像の(srcX, 0)から幅srcTileW、高さimgHを切り出して、画面の(x, y)に64x64(TILE_SIZE)で引き伸ばし描画
+                    DrawRectExtendGraph(x, y, x + TILE_SIZE, y + TILE_SIZE, srcX, 0, srcTileW, imgH, it->imageHandle, TRUE);
+                }
             }
         }
     }
@@ -121,7 +142,6 @@ void StageBuilderScene::Draw() {
         }
     }
 
-    // 範囲選択があれば描画（どのモードでも枠線は常に見えるようにする）
     selectTool->Draw();
 }
 
@@ -131,10 +151,22 @@ void StageBuilderScene::LoadTileConfig() {
     std::string line; std::getline(file, line);
     while (std::getline(file, line)) {
         if (line.empty()) continue;
-        std::stringstream ss(line); std::string idStr, pathStr;
-        std::getline(ss, idStr, ','); std::getline(ss, pathStr, ',');
+        std::stringstream ss(line);
+        std::string idStr, pathStr, animStr, funcStr;
+
+        //カンマ区切りを順番にパース (ID, ImagePath, AnimCount, Function)
+        std::getline(ss, idStr, ',');
+        std::getline(ss, pathStr, ',');
+        std::getline(ss, animStr, ',');
+        std::getline(ss, funcStr, ',');
+
         if (idStr.empty()) continue;
-        BuilderTile tile; tile.id = std::stoi(idStr);
+
+        BuilderTile tile;
+        tile.id = std::stoi(idStr);
+        tile.animCount = animStr.empty() ? 1 : std::stoi(animStr); //💡 アニメーション数を代入
+        tile.function = funcStr;
+
         std::string fullPath = "D:\\GE3A31\\03_MyGame\\Spartan_Cat_Tower\\Data\\Image\\" + pathStr;
         tile.imageHandle = LoadGraph(fullPath.c_str());
         availableTiles.push_back(tile);

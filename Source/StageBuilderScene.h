@@ -1,4 +1,4 @@
-//
+// StageBuilderScene.h
 #pragma once
 #include "../Library/SceneManager.h" 
 #include "../Library/GameObject.h"
@@ -24,13 +24,14 @@ struct BuilderTile {
     int id = 0;
     int imageHandle = -1;
     std::string function;
+    int animCount = 1;      // 💡 アニメーション数を追加（デフォルト1）
 };
 
 class StageBuilderScene : public SceneBase {
 private:
     static const int GRID_COLS = 40;
     static const int GRID_ROWS = 22;
-    static const int TILE_SIZE = 32;
+    static const int TILE_SIZE = 64; // 💡 32から64に変更
     int gridStartX = 200;
     int gridStartY = 80;
 
