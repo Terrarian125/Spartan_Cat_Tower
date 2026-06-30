@@ -10,6 +10,7 @@
 #include <sstream>
 #include "../Library/Input.h"
 #include "../Library/ObjectManager.h"
+#include "../Library/GuiButton.h"
 
 StageBuilderScene::StageBuilderScene() {
     gridData.resize(GRID_ROWS, std::vector<int>(GRID_COLS, 0));
@@ -146,7 +147,8 @@ void StageBuilderScene::Draw() {
 }
 
 void StageBuilderScene::LoadTileConfig() {
-    std::ifstream file("D:\\GE3A31\\03_MyGame\\Spartan_Cat_Tower\\Data\\Stage\\TileConfig.csv");
+    //std::ifstream file("D:\\GE3A31\\03_MyGame\\Spartan_Cat_Tower\\Data\\Stage\\TileConfig.csv");
+    std::ifstream file("Data/Stage/TileConfig.csv");
     if (!file.is_open()) return;
     std::string line; std::getline(file, line);
     while (std::getline(file, line)) {
@@ -164,10 +166,11 @@ void StageBuilderScene::LoadTileConfig() {
 
         BuilderTile tile;
         tile.id = std::stoi(idStr);
-        tile.animCount = animStr.empty() ? 1 : std::stoi(animStr); //💡 アニメーション数を代入
+        tile.animCount = animStr.empty() ? 1 : std::stoi(animStr); //アニメーション数を代入
         tile.function = funcStr;
 
-        std::string fullPath = "D:\\GE3A31\\03_MyGame\\Spartan_Cat_Tower\\Data\\Image\\" + pathStr;
+        //std::string fullPath = "D:\\GE3A31\\03_MyGame\\Spartan_Cat_Tower\\Data\\Image\\" + pathStr;
+        std::string fullPath = "Data/Image/" + pathStr;
         tile.imageHandle = LoadGraph(fullPath.c_str());
         availableTiles.push_back(tile);
     }
