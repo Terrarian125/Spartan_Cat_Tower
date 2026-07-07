@@ -10,6 +10,7 @@
 #include <sstream>
 #include "../Library/Input.h"
 #include "../Library/ObjectManager.h"
+#include "../Library/GuiButton.h"
 
 StageBuilderScene::StageBuilderScene() {
     gridData.resize(GRID_ROWS, std::vector<int>(GRID_COLS, 0));
