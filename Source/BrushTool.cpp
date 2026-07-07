@@ -1,13 +1,13 @@
-//ブラシ 
+// BrushTool.cpp
 #include "DxLib.h"
 #include "BrushTool.h"
 #include "TileStrokeCommand.h"
 #include "../Library/Input.h"
 
-void BrushTool::Update(std::vector<std::vector<int>>& grid, int tileId, std::stack<std::shared_ptr<BuilderCommand>>& undoStack, std::stack<std::shared_ptr<BuilderCommand>>& redoStack) {
+void BrushTool::Update(std::vector<std::vector<int>>& grid, int tileId, std::stack<std::shared_ptr<BuilderCommand>>& undoStack, std::stack<std::shared_ptr<BuilderCommand>>& redoStack, int cameraX, int cameraY, float scale) {
     int col, row;
-	int keepLeft = Input::IsKeepMouseDown(MOUSE_INPUT_LEFT);
-    if (GetGridCoords(col, row)) {
+    int keepLeft = Input::IsKeepMouseDown(MOUSE_INPUT_LEFT);
+    if (GetGridCoords(col, row, cameraX, cameraY, scale)) {
         if (keepLeft == 1) currentStroke.clear();
         if (keepLeft >= 1) {
             if (grid[row][col] != tileId) {

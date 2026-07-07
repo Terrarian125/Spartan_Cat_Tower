@@ -5,7 +5,6 @@
 #include "../Library/GuiButton.h"
 #include "../Library/SceneBase.h"
 
-//各ツールクラス
 #include "BuilderToolBase.h"
 #include "BrushTool.h"
 #include "EraserTool.h"
@@ -24,16 +23,22 @@ struct BuilderTile {
     int id = 0;
     int imageHandle = -1;
     std::string function;
-    int animCount = 1;      // 💡 アニメーション数を追加（デフォルト1）
+    int animCount = 1;
 };
 
 class StageBuilderScene : public SceneBase {
 private:
-    static const int GRID_COLS = 40;
-    static const int GRID_ROWS = 22;
-    static const int TILE_SIZE = 64; // 💡 32から64に変更
+	//グリッドの定義
+    static const int GRID_COLS = 200;
+    static const int GRID_ROWS = 200;
+    static const int TILE_SIZE = 64;
     int gridStartX = 200;
     int gridStartY = 80;
+
+    //カメラとズーム用の変数
+    int cameraX = 0;
+    int cameraY = (GRID_ROWS - 22) * TILE_SIZE;//初期画面でグリッドの下側が見えるように
+    float scale = 1.0f;
 
     std::vector<std::vector<int>> gridData;
     std::vector<BuilderTile> availableTiles;
@@ -42,7 +47,9 @@ private:
     std::vector<GuiButton*> toolbarButtons;
     std::vector<GuiButton*> paletteButtons;
 
-    // 個別のツールインスタンス
+    //スクロールボタン用の追加
+    std::vector<GuiButton*> scrollButtons;
+
     EditMode currentMode = EditMode::BRUSH;
     std::unique_ptr<BrushTool> brushTool;
     std::unique_ptr<EraserTool> eraserTool;

@@ -1,11 +1,15 @@
-//
+// PasteTool.cpp
 #include "PasteTool.h"
 #include "TileStrokeCommand.h"
 #include <Windows.h>
 #include <sstream>
 
-void PasteTool::Execute(std::vector<std::vector<int>>& grid, std::stack<std::shared_ptr<BuilderCommand>>& undoStack, std::stack<std::shared_ptr<BuilderCommand>>& redoStack) {
-    int col, row; if (!GetGridCoords(col, row)) return;
+//引数にカメラ情報を追加
+void PasteTool::Execute(std::vector<std::vector<int>>& grid, std::stack<std::shared_ptr<BuilderCommand>>& undoStack, std::stack<std::shared_ptr<BuilderCommand>>& redoStack, int cameraX, int cameraY, float scale) {
+    int col, row;
+    //GetGridCoordsにカメラ位置とスケールを渡す
+    if (!GetGridCoords(col, row, cameraX, cameraY, scale)) return;
+
     if (!OpenClipboard(NULL)) return;
     HANDLE hData = GetClipboardData(CF_TEXT); if (hData == NULL) { CloseClipboard(); return; }
     char* pMem = (char*)GlobalLock(hData); if (pMem == nullptr) { CloseClipboard(); return; }
@@ -20,7 +24,10 @@ void PasteTool::Execute(std::vector<std::vector<int>>& grid, std::stack<std::sha
             int tc = col + cOffset; if (tc >= maxCols) break;
             if (!val.empty()) {
                 int newId = std::stoi(val);
-                if (grid[tr][tc] != newId) { changes.push_back({ {tc, tr}, {grid[tr][tc], newId} }); grid[tr][tc] = newId; }
+                if (grid[tr][tc] != newId) {
+                    changes.push_back({ {tc, tr}, {grid[tr][tc], newId} });
+                    grid[tr][tc] = newId;
+                }
             }
             cOffset++;
         }
