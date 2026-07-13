@@ -12,5 +12,5 @@
 "PartnerDamageImage,Partner_Damage.png"
 "PlayerVoice,Player_Jump.wav"
 "PartnerVoice,Partner_Pain.wav"
-"InvincibleTime,30,被弾時の無敵フレーム数"
+"InvincibleTime,10,被弾時の無敵フレーム数"
 "DarkenDamageCount,5,何回目のダメージから黒ずみ始めるか"

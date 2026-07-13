@@ -49,6 +49,8 @@ private:
 
     //スクロールボタン用の追加
     std::vector<GuiButton*> scrollButtons;
+    GuiButton* btnToggleScroll = nullptr; //トグルボタン保持用
+    bool showScrollButtons = true;        //現在の表示状態フラグ
 
     EditMode currentMode = EditMode::BRUSH;
     std::unique_ptr<BrushTool> brushTool;

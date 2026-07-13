@@ -74,13 +74,34 @@ StageBuilderScene::StageBuilderScene() {
         ObjectManager::Push(btn);
     }
 
-    //スクロールボタンの配置 (画面右下に配置)
-    auto btnUp = new GuiButton(1150, 600, 40, 40, "▲");
-    auto btnDown = new GuiButton(1150, 650, 40, 40, "▼");
-    auto btnLeft = new GuiButton(1100, 650, 40, 40, "◀");
-    auto btnRight = new GuiButton(1200, 650, 40, 40, "▶");
+    // スクロールボタンの配置
+    auto btnUp = new GuiButton(1150, 600, 40, 40, "^");
+    auto btnDown = new GuiButton(1150, 650, 40, 40, "v");
+    auto btnLeft = new GuiButton(1100, 650, 40, 40, "<");
+    auto btnRight = new GuiButton(1200, 650, 40, 40, ">");
     scrollButtons = { btnUp, btnDown, btnLeft, btnRight };
     for (auto b : scrollButtons) ObjectManager::Push(b);
+
+    //トグルボタンの作成
+    btnToggleScroll = new GuiButton(1200, 600, 40, 40, "Hide");
+    btnToggleScroll->onClick = [this]() {
+        // 表示・非表示フラグを反転
+        this->showScrollButtons = !this->showScrollButtons;
+
+        //4つのスクロールボタンのアクティブ状態を切り替える
+        for (auto b : this->scrollButtons) {
+            b->SetActive(this->showScrollButtons);
+        }
+
+        //トグルボタン自身のテキスト（ラベル）も変更する
+        if (this->showScrollButtons) {
+            this->btnToggleScroll->label = "Hide";
+        }
+        else {
+            this->btnToggleScroll->label = "Show";
+        }
+        };
+    ObjectManager::Push(btnToggleScroll);
 }
 
 StageBuilderScene::~StageBuilderScene() {
