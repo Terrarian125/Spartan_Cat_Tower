@@ -15,7 +15,7 @@
 StageBuilderScene::StageBuilderScene() {
     gridData.resize(GRID_ROWS, std::vector<int>(GRID_COLS, 0));
 
-    //各ツールの初期化
+    //各ツールの初期化　
     brushTool = std::make_unique<BrushTool>(gridStartX, gridStartY, TILE_SIZE, GRID_COLS, GRID_ROWS);
     eraserTool = std::make_unique<EraserTool>(gridStartX, gridStartY, TILE_SIZE, GRID_COLS, GRID_ROWS);
     selectTool = std::make_unique<SelectTool>(gridStartX, gridStartY, TILE_SIZE, GRID_COLS, GRID_ROWS);

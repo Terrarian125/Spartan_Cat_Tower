@@ -1,0 +1,1 @@
+BG=Stage/bg_stage01.png
