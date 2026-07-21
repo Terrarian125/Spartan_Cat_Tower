@@ -1,10 +1,9 @@
-// BuilderToolBase.h
 #pragma once
 #include <vector>
 #include <memory>
 #include <stack>
 
-enum class EditMode { BRUSH, ERASER, SELECT, FILL, MOVE };
+enum class EditMode { BRUSH, ERASER, SELECT, FILL, MOVE, PASTE };
 
 class BuilderCommand {
 public:

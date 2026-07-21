@@ -1,9 +1,10 @@
-// StageBuilderScene.h
 #pragma once
-#include "../Library/SceneManager.h" 
-#include "../Library/GameObject.h"
-#include "../Library/GuiButton.h"
+#include <vector>
+#include <string>
+#include <memory>
+#include <functional>
 #include "../Library/SceneBase.h"
+#include "../Library/GuiButton.h"
 
 #include "BuilderToolBase.h"
 #include "BrushTool.h"
@@ -15,44 +16,28 @@
 #include "PasteTool.h"
 #include "UndoRedoManager.h"
 
-#include <vector>
-#include <string>
-#include <memory>
-
 struct BuilderTile {
     int id = 0;
     int imageHandle = -1;
-    std::string function;
     int animCount = 1;
+    std::string function = "";
 };
 
 class StageBuilderScene : public SceneBase {
 private:
-	//グリッドの定義
     static const int GRID_COLS = 200;
-    static const int GRID_ROWS = 200;
-    static const int TILE_SIZE = 64;
+    static const int GRID_ROWS = 100;
+    static const int TILE_SIZE = 32;
+
     int gridStartX = 200;
     int gridStartY = 80;
 
-    //カメラとズーム用の変数
-    int cameraX = 0;
-    int cameraY = (GRID_ROWS - 22) * TILE_SIZE;//初期画面でグリッドの下側が見えるように
-    float scale = 1.0f;
-
     std::vector<std::vector<int>> gridData;
     std::vector<BuilderTile> availableTiles;
-    int selectedTileId = 2;
-
-    std::vector<GuiButton*> toolbarButtons;
-    std::vector<GuiButton*> paletteButtons;
-
-    //スクロールボタン用の追加
-    std::vector<GuiButton*> scrollButtons;
-    GuiButton* btnToggleScroll = nullptr; //トグルボタン保持用
-    bool showScrollButtons = true;        //現在の表示状態フラグ
+    int selectedTileId = 1;
 
     EditMode currentMode = EditMode::BRUSH;
+
     std::unique_ptr<BrushTool> brushTool;
     std::unique_ptr<EraserTool> eraserTool;
     std::unique_ptr<SelectTool> selectTool;
@@ -62,13 +47,37 @@ private:
     std::unique_ptr<PasteTool> pasteTool;
     std::unique_ptr<UndoRedoManager> undoRedo;
 
+    int cameraX = 0;
+    int cameraY = 0;
+    float scale = 1.0f;
+
+    std::vector<GuiButton*> toolbarButtons;
+    std::vector<GuiButton*> paletteButtons;
+    std::vector<GuiButton*> scrollButtons;
+    GuiButton* btnToggleScroll = nullptr;
+    bool showScrollButtons = true;
+
+    int paletteScrollY = 0;
+
+    // 設定ダイアログ用
+    bool isSettingOpen = false;
+    std::string currentBgPath = "Stage/bg_default.png";
+    int bgHandle = -1;
+    std::vector<int> unlockTileIds;
+    int settingScrollY = 0;
+
     void LoadTileConfig();
     void SaveStage(const std::string& filepath);
     void LoadStage(const std::string& filepath);
+    std::string OpenImageFileDialog();
+
+    // UIの上にマウスがあるかを判定（入力貫通防止用）
+    bool IsMouseOverUI() const;
 
 public:
     StageBuilderScene();
-    ~StageBuilderScene() override;
-    void Update() override;
-    void Draw() override;
+    virtual ~StageBuilderScene() override;
+
+    virtual void Update() override;
+    virtual void Draw() override;
 };

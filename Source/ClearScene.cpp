@@ -112,7 +112,7 @@ void ClearScene::Draw()
         DrawStringToHandle(400, 160, "評価：C", colWhite, fontHandle);
     }
 
-    //--- アンロックパーツ描画（複数対応） ---
+    //アンロックパーツ描画（複数対応
     if (!newUnlocks.empty()) {
         int baseY = 220;
         int itemHeight = 70;
@@ -122,7 +122,7 @@ void ClearScene::Draw()
         DrawBox(280, baseY, 1000, boxHeight, GetColor(30, 30, 45), TRUE);
         DrawBox(280, baseY, 1000, boxHeight, colGold, FALSE);
 
-        DrawStringToHandle(310, baseY + 15, "★ NEW PARTS UNLOCKED! ★", colGold, fontHandle);
+        DrawStringToHandle(310, baseY + 15, "★ PARTS UNLOCKED! ★", colGold, fontHandle);
 
         //パーツリストを縦に並べて描画
         for (size_t i = 0; i < newUnlocks.size(); i++) {
