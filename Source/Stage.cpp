@@ -6,7 +6,6 @@
 #include <fstream>
 #include <iostream>
 
-//初期値（StageSelectScene等から書き換えられる）
 std::string Stage::nextMapPath = "Data/Stage/stage01.csv";
 
 Stage::Stage(std::string configPath, std::string mapPath) {
@@ -15,36 +14,30 @@ Stage::Stage(std::string configPath, std::string mapPath) {
     startPos = VECTOR2(100, 100);
 
     LoadConfig(configPath);
-    LoadMap(mapPath); //既存通りのパスをそのまま渡す
+    LoadMap(mapPath);
 }
 
-//設定(.txt)とマップ(.csv)をそれぞれ別ファイルとして保存する
+//マップ保存：1行目に BG,画像ファイル名 を書き出す
 void Stage::SaveMap(std::string path) {
-    //パスから ".csv" 拡張子を取り除いたベースパスを作成
-    std::string basePath = path;
-    size_t extPos = basePath.rfind(".csv");
-    if (extPos != std::string::npos) {
-        basePath = basePath.substr(0, extPos);
+    std::ofstream ofs(path);
+    if (!ofs) return;
+
+    //1行目に背景設定を保存（例: BG,bg_stage02.png）
+    if (!currentBgPath.empty()) {
+        ofs << "BG," << currentBgPath << std::endl;
+    }
+    else {
+        ofs << "BG,bg_stage01.png" << std::endl; //デフォルト画像
     }
 
-    //設定ファイル (.txt) の保存
-    std::ofstream txtOfs(basePath + ".txt");
-    if (txtOfs) {
-        txtOfs << "BG=" << currentBgPath << std::endl;
-        txtOfs.close();
-    }
-
-    //マップデータ (.csv) の保存（純粋な数値データのみ）
-    std::ofstream csvOfs(basePath + ".csv");
-    if (!csvOfs) return;
-
+    //2行目以降にマップデータを書き出す
     for (const auto& row : mapData) {
         for (int i = 0; i < (int)row.size(); i++) {
-            csvOfs << row[i] << (i < (int)row.size() - 1 ? "," : "");
+            ofs << row[i] << (i < (int)row.size() - 1 ? "," : "");
         }
-        csvOfs << std::endl;
+        ofs << std::endl;
     }
-    csvOfs.close();
+    ofs.close();
 }
 
 //TileConfig.csv の読込
@@ -74,46 +67,29 @@ void Stage::LoadConfig(std::string path) {
     }
 }
 
-//.txt と .csv から背景とマップデータを綺麗に分離して読み込む
+//マップ読み込み：1行目が BG かチェックして読み分ける
 void Stage::LoadMap(std::string path) {
     currentMapPath = path;
-    mapData.clear();
+    mapData.clear(); //既存データをリセット
 
-    //パスから ".csv" 拡張子を取り除いたベースパスを作成
-    std::string basePath = path;
-    size_t extPos = basePath.rfind(".csv");
-    if (extPos != std::string::npos) {
-        basePath = basePath.substr(0, extPos);
-    }
-
-    //同名の設定ファイル (.txt) から背景情報を読み込む
-    std::string txtPath = basePath + ".txt";
-    std::ifstream ifs(txtPath);
-    if (ifs) {
-        std::string line;
-        while (std::getline(ifs, line)) {
-            auto pos = line.find('=');
-            if (pos == std::string::npos) continue;
-
-            std::string key = line.substr(0, pos);
-            std::string val = line.substr(pos + 1);
-
-            if (key == "BG") {
-                currentBgPath = val;
-                std::string bgPath = "Data/Image/" + currentBgPath;
-                bgHandle = LoadGraph(bgPath.c_str());
-            }
-        }
-        ifs.close();
-    }
-
-    //マップ配置データの読み込み
-    std::string csvPath = basePath + ".csv";
-    CsvReader csv(csvPath);
+    CsvReader csv(path);
     if (csv.GetLines() <= 0) return;
 
-    //1行目から純粋な数値データとして処理
-    for (int i = 0; i < csv.GetLines(); i++) {
+    int startLine = 0;
+
+    //1行目の1列目が "BG" の場合（例: BG, bg_stage02.png）
+    if (csv.GetString(0, 0) == "BG") {
+        currentBgPath = csv.GetString(0, 1); //2列目のファイル名を取得
+
+        if (!currentBgPath.empty()) {
+            std::string bgPath = "Data/Image/" + currentBgPath;
+            bgHandle = LoadGraph(bgPath.c_str());
+        }
+        startLine = 1; //マップデータの読み込み開始行を2行目（インデックス1）にする
+    }
+
+    //マップデータの読み込み
+    for (int i = startLine; i < csv.GetLines(); i++) {
         std::vector<int> row;
         for (int j = 0; j < csv.GetColumns(i); j++) {
             int val = csv.GetInt(i, j);
@@ -121,14 +97,13 @@ void Stage::LoadMap(std::string path) {
 
             //プレイヤーのスタート位置
             if (val == 1) {
-                startPos = VECTOR2(j * TILE_SIZE + TILE_SIZE / 2.0f, i * TILE_SIZE + TILE_SIZE / 2.0f);
+                startPos = VECTOR2(j * TILE_SIZE + TILE_SIZE / 2.0f, (i - startLine) * TILE_SIZE + TILE_SIZE / 2.0f);
             }
         }
         mapData.push_back(row);
     }
 }
 
-//指定座標にあるタイルの「機能名」を返す
 std::string Stage::GetTileFunction(float px, float py) {
     int tx = (int)(px / TILE_SIZE);
     int ty = (int)(py / TILE_SIZE);
