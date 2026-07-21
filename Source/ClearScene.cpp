@@ -12,17 +12,16 @@ ClearScene::ClearScene()
     hSound = LoadSoundMem("Data/Sound/ClearSound.wav");
     PlaySoundMem(hSound, DX_PLAYTYPE_BACK);
 
-    //1. Data/keifont.ttf の読み込み（フォント名: "けいふぉんと", サイズ: 28px）
+    //Data/keifont.ttf の読み込み
     AddFontResourceEx("Data/keifont.ttf", FR_PRIVATE, NULL);
     fontHandle = CreateFontToHandle("けいふぉんと", 28, 3, DX_FONTTYPE_ANTIALIASING);
 
-    //2. このステージで解禁されるパーツがあればアンロック処理
-    int unlockId = Stage::lastUnlockedTileId;
-    if (unlockId > 0) {
-        UnlockTileInConfig(unlockId);
+    //解禁対象パーツの一括アンロック処理
+    if (!Stage::lastUnlockedTileIds.empty()) {
+        UnlockTilesInConfig(Stage::lastUnlockedTileIds);
     }
 
-    //ステージ選択画面へ戻るボタンの設定
+    //ステージ選択ボタンの設定
     int bx = 50, by = 50, bw = 100, bh = 100;
     int btnImg_StBack = LoadGraph("data/image/btnImg_StBack.png");
 
@@ -34,15 +33,16 @@ ClearScene::ClearScene()
 
 ClearScene::~ClearScene()
 {
-    //フォントリソースの解放
     if (fontHandle != -1) DeleteFontToHandle(fontHandle);
     RemoveFontResourceEx("Data/keifont.ttf", FR_PRIVATE, NULL);
 
-    if (unlockedTileImg != -1) DeleteGraph(unlockedTileImg);
+    for (auto& item : newUnlocks) {
+        if (item.imgHandle != -1) DeleteGraph(item.imgHandle);
+    }
 }
 
-//TileConfig.csv のアンロックフラグ（6列目）を 1 に書き換え＆演出用データの読み込み
-void ClearScene::UnlockTileInConfig(int targetId)
+//TileConfig.csv の対象IDのアンロックフラグを 1 に更新
+void ClearScene::UnlockTilesInConfig(const std::vector<int>& targetIds)
 {
     CsvReader csv("Data/Stage/TileConfig.csv");
     if (csv.GetLines() <= 0) return;
@@ -51,23 +51,26 @@ void ClearScene::UnlockTileInConfig(int targetId)
     lines.push_back("id,image,anim,function,description,unlocked");
 
     for (int i = 1; i < csv.GetLines(); i++) {
-        // 列数が足りない壊れた行はスキップ
         if (csv.GetColumns(i) < 4) continue;
 
         int id = csv.GetInt(i, 0);
         std::string img = csv.GetString(i, 1);
         int anim = csv.GetInt(i, 2);
         std::string func = csv.GetString(i, 3);
-
-        // 5列目（description）、6列目（unlocked）が存在するかチェック
         std::string desc = (csv.GetColumns(i) >= 5) ? csv.GetString(i, 4) : "";
         int unlocked = (csv.GetColumns(i) >= 6) ? csv.GetInt(i, 5) : 1;
 
-        if (id == targetId) {
-            unlocked = 1;
-            hasNewUnlock = true;
-            unlockedTileDesc = desc;
-            unlockedTileImg = LoadGraph(("Data/Image/" + img).c_str());
+        //targetIds リストに自分が含まれているか確認
+        for (int targetId : targetIds) {
+            if (id == targetId) {
+                unlocked = 1; //フラグをオンにする
+
+                UnlockedItemInfo info;
+                info.desc = desc;
+                info.imgHandle = LoadGraph(("Data/Image/" + img).c_str());
+                newUnlocks.push_back(info);
+                break;
+            }
         }
 
         std::string line = std::to_string(id) + "," + img + "," + std::to_string(anim) + "," +
@@ -96,36 +99,41 @@ void ClearScene::Draw()
     int colWhite = GetColor(255, 255, 255);
     int colGold = GetColor(255, 215, 0);
 
-    //スコア＆クリアテキスト（けいふぉんと適用）
-    DrawStringToHandle(400, 80, "STAGE CLEAR!", colGold, fontHandle);
-    DrawFormatStringToHandle(400, 130, colWhite, fontHandle, "受けたダメージ: %d 回", dmg);
+    DrawStringToHandle(400, 60, "STAGE CLEAR!", colGold, fontHandle);
+    DrawFormatStringToHandle(400, 110, colWhite, fontHandle, "受けたダメージ: %d 回", dmg);
 
     if (dmg == 0) {
-        DrawStringToHandle(400, 180, "評価：SSS", colGold, fontHandle);
+        DrawStringToHandle(400, 160, "評価：SSS", colGold, fontHandle);
     }
     else if (dmg < 5) {
-        DrawStringToHandle(400, 180, "評価：A", colWhite, fontHandle);
+        DrawStringToHandle(400, 160, "評価：A", colWhite, fontHandle);
     }
     else {
-        DrawStringToHandle(400, 180, "評価：C", colWhite, fontHandle);
+        DrawStringToHandle(400, 160, "評価：C", colWhite, fontHandle);
     }
 
-    //新パーツ解放時のウィンドウ演出
-    if (hasNewUnlock) {
-        //背景枠（ゴールドの縁取り付きウィンドウ）
-        DrawBox(300, 240, 980, 500, GetColor(30, 30, 45), TRUE);
-        DrawBox(300, 240, 980, 500, colGold, FALSE);
+    //--- アンロックパーツ描画（複数対応） ---
+    if (!newUnlocks.empty()) {
+        int baseY = 220;
+        int itemHeight = 70;
+        int boxHeight = baseY + 60 + (int)newUnlocks.size() * itemHeight;
 
-        DrawStringToHandle(330, 260, "★ NEW PART UNLOCKED! ★", colGold, fontHandle);
+        //背景枠描画
+        DrawBox(280, baseY, 1000, boxHeight, GetColor(30, 30, 45), TRUE);
+        DrawBox(280, baseY, 1000, boxHeight, colGold, FALSE);
 
-        //パーツ画像の描画（拡大表示）
-        if (unlockedTileImg != -1) {
-            DrawExtendGraph(340, 320, 340 + 96, 320 + 96, unlockedTileImg, TRUE);
-        }
+        DrawStringToHandle(310, baseY + 15, "★ NEW PARTS UNLOCKED! ★", colGold, fontHandle);
 
-        //説明文の描画
-        if (!unlockedTileDesc.empty()) {
-            DrawStringToHandle(460, 350, unlockedTileDesc.c_str(), colWhite, fontHandle);
+        //パーツリストを縦に並べて描画
+        for (size_t i = 0; i < newUnlocks.size(); i++) {
+            int drawY = baseY + 60 + (int)i * itemHeight;
+
+            if (newUnlocks[i].imgHandle != -1) {
+                DrawExtendGraph(320, drawY, 320 + 56, drawY + 56, newUnlocks[i].imgHandle, TRUE);
+            }
+            if (!newUnlocks[i].desc.empty()) {
+                DrawStringToHandle(400, drawY + 12, newUnlocks[i].desc.c_str(), colWhite, fontHandle);
+            }
         }
     }
 }

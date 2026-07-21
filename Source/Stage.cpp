@@ -5,10 +5,10 @@
 #include <math.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 std::string Stage::nextMapPath = "Data/Stage/stage01.csv";
-int Stage::lastUnlockedTileId = -1;
-float Stage::lastPlayerSpeed = 5.0f; //デフォルト速度
+std::vector<int> Stage::lastUnlockedTileIds;
 
 Stage::Stage(std::string configPath, std::string mapPath) {
     SetDrawOrder(100);
@@ -19,14 +19,20 @@ Stage::Stage(std::string configPath, std::string mapPath) {
     LoadMap(mapPath);
 }
 
-//マップ保存：1行目に CONFIG,画像名,アンロックID を書き出す
+//マップ保存：1行目に CONFIG,画像名,アンロックID群 を書き出す
 void Stage::SaveMap(std::string path) {
     std::ofstream ofs(path);
     if (!ofs) return;
 
-    //1行目に設定を保存（例: CONFIG,bg_stage02.png,5）
     std::string bg = currentBgPath.empty() ? "bg_stage01.png" : currentBgPath;
-    ofs << "CONFIG," << bg << "," << unlockTileId << std::endl;
+
+    //アンロックIDリストをスペース区切り文字列にする
+    std::string unlockStr = "";
+    for (size_t i = 0; i < unlockTileIds.size(); i++) {
+        unlockStr += std::to_string(unlockTileIds[i]) + (i < unlockTileIds.size() - 1 ? " " : "");
+    }
+
+    ofs << "CONFIG," << bg << "," << unlockStr << std::endl;
 
     //2行目以降にマップデータを書き出す
     for (const auto& row : mapData) {
@@ -69,6 +75,7 @@ void Stage::LoadConfig(std::string path) {
 void Stage::LoadMap(std::string path) {
     currentMapPath = path;
     mapData.clear();
+    unlockTileIds.clear();
 
     CsvReader csv(path);
     if (csv.GetLines() <= 0) return;
@@ -76,39 +83,51 @@ void Stage::LoadMap(std::string path) {
     int startLine = 0;
     std::string firstTag = csv.GetString(0, 0);
 
-    // 1行目が "CONFIG" または "BG" の場合
     if (firstTag == "BG" || firstTag == "CONFIG") {
-        currentBgPath = csv.GetString(0, 1); // 2列目：背景画像名
+        currentBgPath = csv.GetString(0, 1);
 
         if (!currentBgPath.empty()) {
             std::string bgPath = "Data/Image/" + currentBgPath;
             bgHandle = LoadGraph(bgPath.c_str());
         }
 
-        // 3列目（インデックス2）が存在し、かつ空文字でない場合のみ GetInt する
-        if (csv.GetColumns(0) >= 3 && !csv.GetString(0, 2).empty()) {
-            unlockTileId = csv.GetInt(0, 2);
-        }
-        else {
-            unlockTileId = -1; // 指定がなければアンロックなし
+        //3列目：スペース区切りのアンロックIDリストを取得（例: "5 8 12"）
+        if (csv.GetColumns(0) >= 3) {
+            std::string unlockStr = csv.GetString(0, 2);
+            if (!unlockStr.empty()) {
+                std::stringstream ss(unlockStr);
+                int id;
+                while (ss >> id) {
+                    unlockTileIds.push_back(id);
+                }
+            }
         }
 
-        Stage::lastUnlockedTileId = unlockTileId; // 静的変数へセット
-
-        startLine = 1; // 2行目からマップデータを読む
+        Stage::lastUnlockedTileIds = unlockTileIds; //静的変数へ保持
+        startLine = 1;
     }
     else {
-        Stage::lastUnlockedTileId = -1;
+        Stage::lastUnlockedTileIds.clear();
     }
 
-    // マップ配置データの読み込み
+    //マップ配置データの読み込み（安全ガード付き）
     for (int i = startLine; i < csv.GetLines(); i++) {
         std::vector<int> row;
         for (int j = 0; j < csv.GetColumns(i); j++) {
-            int val = csv.GetInt(i, j);
+            std::string str = csv.GetString(i, j);
+
+            int val = 0;
+            if (!str.empty()) {
+                try {
+                    val = std::stoi(str);
+                }
+                catch (...) {
+                    val = 0;
+                }
+            }
+
             row.push_back(val);
 
-            // プレイヤーのスタート位置
             if (val == 1) {
                 startPos = VECTOR2(j * TILE_SIZE + TILE_SIZE / 2.0f, (i - startLine) * TILE_SIZE + TILE_SIZE / 2.0f);
             }

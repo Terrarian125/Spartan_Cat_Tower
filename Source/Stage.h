@@ -34,8 +34,8 @@ public:
 
     //静的変数（クリア画面等で共有
     static std::string nextMapPath;
-    static int lastUnlockedTileId;  //クリア画面でアンロックするタイルID
-    static float lastPlayerSpeed;   //ステージごとのプレイヤー速度（拡張用）
+    static std::vector<int> lastUnlockedTileIds;//クリア画面でアンロックするタイルID
+    static float lastPlayerSpeed;//ステージごとのプレイヤー速度（拡張用）
 
     const float TILE_SIZE = 64.0f;
 
@@ -51,5 +51,5 @@ private:
 
     std::string currentMapPath; //現在のマップパス
     std::string currentBgPath;  //背景画像パス
-    int unlockTileId = -1;      //このステージで解放されるタイルID
+    std::vector<int> unlockTileIds;//このステージで解放されるタイルID
 };

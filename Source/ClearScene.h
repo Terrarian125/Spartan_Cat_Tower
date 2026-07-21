@@ -4,6 +4,12 @@
 #include <string>
 #include <vector>
 
+//解放されたパーツの情報構造体
+struct UnlockedItemInfo {
+    int imgHandle = -1;
+    std::string desc = "";
+};
+
 class ClearScene : public SceneBase
 {
 public:
@@ -19,11 +25,9 @@ private:
 
     //けいふぉんと＆アンロック演出用
     int fontHandle = -1;
-    int unlockedTileImg = -1;
-    std::string unlockedTileDesc = "";
-    bool hasNewUnlock = false;
+    std::vector<UnlockedItemInfo> newUnlocks; //複数パーツの情報リスト
 
     std::vector<GuiButton*> buttons;
 
-    void UnlockTileInConfig(int targetId);
+    void UnlockTilesInConfig(const std::vector<int>& targetIds);
 };
