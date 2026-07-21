@@ -80,6 +80,11 @@ void ObjectManager::Pop(GameObject* obj)
 
 void ObjectManager::DeleteAllGameObject()
 {
+	//objectsがすでに解放済みなら何もしない
+	if (objects == nullptr) {
+		return;
+	}
+
 	assert(running == nullptr);
 
 	std::list<GameObject*> deleteObjects = *objects;
