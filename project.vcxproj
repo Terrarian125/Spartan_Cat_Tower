@@ -163,6 +163,7 @@
     <ClInclude Include="Source\BuilderToolBase.h" />
     <ClInclude Include="Source\ClearScene.h" />
     <ClInclude Include="Source\CopyTool.h" />
+    <ClInclude Include="Source\CoyoteTime.h" />
     <ClInclude Include="Source\EraserTool.h" />
     <ClInclude Include="Source\FillTool.h" />
     <ClInclude Include="Source\global.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="Source\BuilderToolBase.cpp" />
     <ClCompile Include="Source\ClearScene.cpp" />
     <ClCompile Include="Source\CopyTool.cpp" />
+    <ClCompile Include="Source\CoyoteTime.cpp" />
     <ClCompile Include="Source\EraserTool.cpp" />
     <ClCompile Include="Source\FillTool.cpp" />
     <ClCompile Include="Source\LoadScene.cpp" />

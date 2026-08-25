@@ -33,7 +33,7 @@ void Ball2D::LoadParam(std::string path) {
         std::string name = csv.GetString(i, 0);
         std::string fileName = csv.GetString(i, 1);
 
-        //文字列として処理する項目（数値変換をスキップ） 
+        //文字列として処理する項目（数値変換をスキップ）
         if (name == "PlayerImage" || name == "PartnerImage") {
             if ((isPlayer && name == "PlayerImage") || (!isPlayer && name == "PartnerImage")) {
                 hImage = LoadGraph(("Data/Image/" + fileName).c_str());
@@ -53,19 +53,19 @@ void Ball2D::LoadParam(std::string path) {
             continue;
         }
 
-        //ここから数値変換が必要な項目 
+        //ここから数値変換が必要な項目
         //GetFloatを呼ぶ前に、値が空でないか、数値っぽいかを確認するのが安全
         float val = (float)csv.GetFloat(i, 1);
 
-		if (name == "Radius")           RADIUS = val;//半径
-		else if (name == "Gravity")     G = val;//重力加速度
-		else if (name == "MoveSpeed")   SPEED = val;//移動速度
-		else if (name == "JumpHeight")  tempHeight = val;//ジャンプの高さ（初速計算用）
-		else if (name == "BumpLife")    BUMP_MAX_LIFE = val;//バンプエフェクトの最大寿命
-		else if (name == "SpringLength") SPRING_L = val;//紐の自然長
-		else if (name == "SpringK")      K = val;//バネ定数
-		else if (isPlayer && name == "MassPlayer")    mass = val;//プレイヤー用の質量
-		else if (!isPlayer && name == "MassPartner")  mass = val;//パートナー用の質量
+        if (name == "Radius")           RADIUS = val;//半径
+        else if (name == "Gravity")     G = val;//重力加速度
+        else if (name == "MoveSpeed")   SPEED = val;//移動速度
+        else if (name == "JumpHeight")  tempHeight = val;//ジャンプの高さ（初速計算用）
+        else if (name == "BumpLife")    BUMP_MAX_LIFE = val;//バンプエフェクトの最大寿命
+        else if (name == "SpringLength") SPRING_L = val;//紐の自然長
+        else if (name == "SpringK")      K = val;//バネ定数
+        else if (isPlayer && name == "MassPlayer")    mass = val;//プレイヤー用の質量
+        else if (!isPlayer && name == "MassPartner")  mass = val;//パートナー用の質量
     }
 
     //重力からジャンプ初速を計算
@@ -89,14 +89,20 @@ void Ball2D::Update() {
         isFirstUpdate = false;
     }
 
+    //コヨーテタイム更新
+    if (isPlayer) {
+        coyoteTime.Update();
+    }
+
     //プレイヤー操作時の入力処理
     if (isPlayer) {
         if (Input::IsKeepKeyDown(KEY_INPUT_A)) moveInput -= SPEED;
         if (Input::IsKeepKeyDown(KEY_INPUT_D)) moveInput += SPEED;
         if (Input::IsKeepKeyDown(KEY_INPUT_S)) isDownPressed = true;
 
-        if (Input::IsKeyDown(KEY_INPUT_SPACE) && abs(velocity.y) < 1.0f) {
+        if (Input::IsKeyDown(KEY_INPUT_SPACE) && coyoteTime.CanJump()) {
             velocity.y = JUMP;
+            coyoteTime.Start();
         }
     }
 
@@ -113,16 +119,16 @@ void Ball2D::Update() {
 
     //物理更新
     gimmick.SetParams(G, JUMP);
-    gimmick.UpdatePhysics(position, velocity, RADIUS, isPlayer, isDownPressed, moveInput, voiceHandle, this);
+    gimmick.UpdatePhysics(position, velocity, RADIUS, isPlayer, isDownPressed, moveInput, voiceHandle, this, coyoteTime);
 
-	//速度の制限
-    float maxSpeedX = 10.0f; // 左右の最大速度
-    float maxSpeedY = 20.0f; // 下方向の最大速度
+    //速度の制限
+    float maxSpeedX = 10.0f; //左右の最大速度
+    float maxSpeedY = 20.0f; //下方向の最大速度
 
     if (velocity.x > maxSpeedX)  velocity.x = maxSpeedX;
-    if (velocity.x < -maxSpeedX) velocity.x = -maxSpeedX;
+    if (velocity.x < -maxSpeedX)  velocity.x = -maxSpeedX;
     if (velocity.y > maxSpeedY)  velocity.y = maxSpeedY;
-    if (velocity.y < -maxSpeedY) velocity.y = -maxSpeedY;
+    if (velocity.y < -maxSpeedY)  velocity.y = -maxSpeedY;
 
 
     //ダメージ判定(落下は平気、壁激突と極端な引っ張りのみ
@@ -136,7 +142,7 @@ void Ball2D::Update() {
         if (partner) {
             VECTOR2 diff = position - partner->GetPosition();
             float dist = VSize(diff);
-			if (dist > SPRING_L * 2.0f) {//ここの2.0fは調整用の係数
+            if (dist > SPRING_L * 2.0f) {//ここの2.0fは調整用の係数
                 if (painTimer <= 0) OnDamage();
             }
         }
@@ -151,7 +157,7 @@ void Ball2D::Update() {
 
 void Ball2D::OnDamage() {
     if (painTimer <= 0) { //無敵時間中でなければ
-        painTimer = 180;  //3秒間ダメージ顔
+        painTimer = 180; //3秒間ダメージ顔
 
         if (!isPlayer) {
             damageCount++;
@@ -188,7 +194,7 @@ void Ball2D::Draw() {
         DrawLine(dx, dy, (int)(pPos.x - sx), (int)(pPos.y - sy), GetColor(255, 255, 255), 2);
     }
 
-    //ダメージに応じた黒ずみ（輝度）計算 
+    //ダメージに応じた黒ずみ（輝度）計算
     int brightness = 255;
     if (!isPlayer && damageCount >= 5) {
         //5回から開始して30回でほぼ黒になる計算
@@ -224,12 +230,13 @@ void Ball2D::Draw() {
     if (isPlayer) {
         DrawFormatString(10, 10, GetColor(255, 255, 255), "X:%.1f Y:%.1f", position.x, position.y);
     }
+
     //ダメージ回数の表示
     if (!isPlayer) {
         DrawFormatString(10, 30, GetColor(255, 255, 255), "Damage: %d", damageCount);
     }
+
     if (isPlayer) {
         gimmick.DrawFade();
     }
-
 }

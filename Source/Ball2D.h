@@ -1,6 +1,7 @@
 #pragma once
 #include "../Library/Object2D.h"
 #include "StageGimmick.h"
+#include "CoyoteTime.h"
 #include <string>
 
 class Ball2D : public Object2D {
@@ -21,7 +22,7 @@ public:
     //ダメージ回数を取得する関数
     int GetDamageCount() const { return damageCount; }
 
-	static int lastTotalDamage; //クリアシーンで表示するための静的変数
+    static int lastTotalDamage; //クリアシーンで表示するための静的変数
 
     Ball2D* GetPartner() const { return partner; }
 
@@ -29,6 +30,7 @@ public:
 
 private:
     StageGimmick gimmick;
+	CoyoteTime coyoteTime;//
     bool isPlayer;
     unsigned int color;
     Ball2D* partner = nullptr;
@@ -48,7 +50,7 @@ private:
     int dmgImgHandle;
     int voiceHandle;
     int painTimer = 0;
-    int damageCount = 0; //ダメージを受けた総回数を記録する変数
+    int damageCount = 0; //ダメージを受けた回数を記録する変数
 
     struct Bump {
         bool active = false;

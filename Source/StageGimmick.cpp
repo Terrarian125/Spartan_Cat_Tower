@@ -1,33 +1,20 @@
 #include "StageGimmick.h"
 #include "Stage.h"
 #include "Ball2D.h"
+#include "CoyoteTime.h"
 #include "../Library/SceneManager.h"
 #include <math.h>
 #include <string>
-#include <DxLib.h> //SetDrawBlendMode 等のために必要
+#include <DxLib.h>
 
 StageGimmick::StageGimmick() {
     isGoalStarted = false;
     fadeAlpha = 0.0f;
 }
 
-void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool isPlayer, bool isDownPressed, float moveInput, int voiceHandle, Ball2D* pBall) {
+void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool isPlayer, bool isDownPressed, float moveInput, int voiceHandle, Ball2D* pBall, CoyoteTime& coyoteTime) {
     Stage* stage = FindGameObject<Stage>();
     if (!stage) return;
-
-  // //透明ブロックの判定
-  // float headY = pos.y - radius; //ボールの頭の座標　
-  // std::string headAttr = stage->GetTileFunction(pos.x, headY + vel.y); //次のフレームの頭の位置
-
-  // if (headAttr == "SOLID") {
-		////もし頭上が透明ブロックだったら、跳ね返る処理をする
-  //     if (vel.y < 0) {
-  //         vel.y *= -0.5f; //跳ね返る
-  //         //天井にめり込まないように位置を調整
-  //         float tileBottomY = floor((headY + vel.y) / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
-  //         pos.y = tileBottomY + radius + 1.0f;
-  //     }
-  // }
 
     //ゴール演出中の処理
     if (isGoalStarted) {
@@ -36,10 +23,9 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
             fadeAlpha = 255.0f;
             SceneManager::ChangeScene("CLEAR");
         }
-        //フェード中は物理演算を止める、または移動を制限したい場合はここで return しても良い
     }
 
-    //その後、既存の垂直移動を適用
+    //縦方向の速度移動を適用
     pos.y += vel.y;
 
     //入力、重力、氷の摩擦計算
@@ -57,7 +43,7 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
     vel.y += G;
     if (!isPlayer) vel.x *= 0.95f;
 
-    //水平移動
+    //横方向移動
     float oldX = pos.x;
     pos.x += vel.x;
 
@@ -72,28 +58,28 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
         }
     }
 
-    //垂直移動
+    //縦方向移動
     pos.y += vel.y;
 
-    //属性確認
+    //足元確認
     float footX = pos.x;
     float footY = pos.y + radius;
     std::string attr = stage->GetTileFunction(footX, footY);
     std::string centerAttr = stage->GetTileFunction(pos.x, pos.y);
 
-    //ゴール判定の修正
+    //ゴール判定
     if (centerAttr == "GOAL" && !isGoalStarted) {
         if (pBall && isPlayer) {
             Ball2D* partner = pBall->GetPartner();
             if (partner) {
                 Ball2D::lastTotalDamage = partner->GetDamageCount();
             }
-            isGoalStarted = true; //即座にChangeSceneせず、フラグを立てる
+            isGoalStarted = true;
             return;
         }
     }
 
-    //トゲ床の処理
+    //トゲ処理
     if (stage->GetTileFunction(pos.x, pos.y + radius) == "SPIKE" ||
         stage->GetTileFunction(pos.x, pos.y - radius) == "SPIKE" ||
         stage->GetTileFunction(pos.x + radius, pos.y) == "SPIKE" ||
@@ -109,7 +95,7 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
         }
     }
 
-    //坂道吸着の処理
+    //斜面処理
     if (attr == "SLOPE_R" || attr == "SLOPE_L") {
         float localX = fmod(footX, TILE_SIZE);
         if (localX < 0) localX += TILE_SIZE;
@@ -121,9 +107,14 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
         if (vel.y >= 0 || pos.y > targetY - 15.0f) {
             pos.y = targetY;
             vel.y = 0;
+
+            //接地したのでコヨーテタイムを開始
+            if (isPlayer) {
+                coyoteTime.Start();
+            }
         }
     }
-    //着地判定
+    //地面判定
     else if (attr == "SOLID" || attr == "SPRING" || attr == "ICE" || attr == "ONE_WAY" || attr == "SPIKE") {
         bool isLanding = false;
         float tileTopY = floor(footY / TILE_SIZE) * TILE_SIZE;
@@ -139,12 +130,21 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
 
         if (isLanding) {
             pos.y = tileTopY - radius;
+
             if (attr == "SPRING") {
                 vel.y = JUMP * 1.5f;
-                if (voiceHandle != -1) PlaySoundMem(voiceHandle, DX_PLAYTYPE_BACK);
+
+                if (voiceHandle != -1) {
+                    PlaySoundMem(voiceHandle, DX_PLAYTYPE_BACK);
+                }
             }
             else {
                 vel.y = 0;
+            }
+
+            //接地したのでコヨーテタイムを開始
+            if (isPlayer && attr != "SPRING") {
+                coyoteTime.Start();
             }
         }
     }
@@ -154,7 +154,7 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
 void StageGimmick::DrawFade() {
     if (fadeAlpha > 0.0f) {
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)fadeAlpha);
-        //画面全体を黒く塗る（サイズは環境に合わせて1280, 720等に変更してください）
+        //画面全体を黒く塗る
         DrawFillBox(0, 0, 1280, 720, GetColor(0, 0, 0));
         SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
