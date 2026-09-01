@@ -228,12 +228,12 @@ void Ball2D::Draw() {
 
     //座標のデバッグ表示
     if (isPlayer) {
-        DrawFormatString(10, 10, GetColor(255, 255, 255), "X:%.1f Y:%.1f", position.x, position.y);
+        //DrawFormatString(10, 10, GetColor(255, 255, 255), "X:%.1f Y:%.1f", position.x, position.y);
     }
 
     //ダメージ回数の表示
     if (!isPlayer) {
-        DrawFormatString(10, 30, GetColor(255, 255, 255), "Damage: %d", damageCount);
+        //DrawFormatString(10, 30, GetColor(255, 255, 255), "Damage: %d", damageCount);
     }
 
     if (isPlayer) {
