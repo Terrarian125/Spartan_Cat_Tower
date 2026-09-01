@@ -14,6 +14,12 @@ public:
     void DrawFade();//ゴール演出のフェード描画
     void SetParams(float gravity, float jump) { G = gravity; JUMP = jump; }
 
+    //デバッグ用
+    static float GetPhysicsTime();
+    static float GetHorizontalTime();
+    static float GetVerticalTime();
+    static float GetSpikeTime();
+
 private:
     float G = 0.5f;
     float JUMP = -12.0f;
@@ -22,4 +28,10 @@ private:
     bool isGoalStarted = false;
     float fadeAlpha = 15.0f;
     float fadeSpeed = 1.0f;//フェードの速さ
+
+    //デバッグ用
+    static float physicsTime;
+    static float horizontalTime;
+    static float verticalTime;
+    static float spikeTime;
 };

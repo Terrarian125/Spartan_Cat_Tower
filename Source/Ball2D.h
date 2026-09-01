@@ -16,13 +16,14 @@ public:
     void OnDamage();
 
     void SetPosition(VECTOR2 pos) { position = pos; }
+    void SetVelocity(VECTOR2 vel) { velocity = vel; }
     void AddForce(VECTOR2 force) { velocity = velocity + force; }
     void SetPartner(Ball2D* _partner) { partner = _partner; }
 
-    //ダメージ回数を取得する関数
+    //ダメージ回数を取得
     int GetDamageCount() const { return damageCount; }
 
-    static int lastTotalDamage; //クリアシーンで表示するための静的変数
+    static int lastTotalDamage;
 
     Ball2D* GetPartner() const { return partner; }
 
@@ -30,14 +31,19 @@ public:
 
 private:
     StageGimmick gimmick;
-	CoyoteTime coyoteTime;//
+    CoyoteTime coyoteTime;
+
     bool isPlayer;
     unsigned int color;
     Ball2D* partner = nullptr;
 
     VECTOR2 velocity;
     VECTOR2 startPosition;
-    void ResetPosition() { position = startPosition; velocity = VECTOR2(0, 0); }
+
+    void ResetPosition() {
+        position = startPosition;
+        velocity = VECTOR2(0, 0);
+    }
 
     float RADIUS;
     float G;
@@ -47,10 +53,25 @@ private:
     float K;
     float BUMP_MAX_LIFE;
 
+    //パートナー救済用
+    static constexpr int RESCUE_TIME = 3000;
+    static constexpr float RESCUE_DISTANCE = 2.0f;
+    int rescueStartTime = -1;
+
     int dmgImgHandle;
     int voiceHandle;
     int painTimer = 0;
-    int damageCount = 0; //ダメージを受けた回数を記録する変数
+    int damageCount = 0;
+
+    //デバッグ表示
+    static bool debugVisible;
+    static int debugLastTime;
+    static float debugFPS;
+    static float debugMinFPS;
+    static int debugFPSResetTime;
+
+    //物理処理時間
+    static float debugPhysicsTime;
 
     struct Bump {
         bool active = false;

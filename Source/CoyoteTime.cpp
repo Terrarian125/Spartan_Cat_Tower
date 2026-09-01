@@ -38,6 +38,12 @@ void CoyoteTime::SetGrounded(bool grounded) {
     }
 }
 
+void CoyoteTime::ConsumeJump() {
+    //ジャンプしたので接地とコヨーテタイムを消費
+    isGrounded = false;
+    timer = 0.0f;
+}
+
 bool CoyoteTime::CanJump() const {
     return isGrounded || timer > 0.0f;
 }
