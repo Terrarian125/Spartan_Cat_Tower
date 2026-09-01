@@ -1,8 +1,11 @@
 #include "StageGimmick.h"
+
 #include "Stage.h"
 #include "Ball2D.h"
 #include "CoyoteTime.h"
+
 #include "../Library/SceneManager.h"
+
 #include <math.h>
 #include <string>
 #include <DxLib.h>
@@ -19,6 +22,7 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
     //ゴール演出中の処理
     if (isGoalStarted) {
         fadeAlpha += fadeSpeed;
+
         if (fadeAlpha >= 255.0f) {
             fadeAlpha = 255.0f;
             SceneManager::ChangeScene("CLEAR");
@@ -41,21 +45,42 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
     }
 
     vel.y += G;
-    if (!isPlayer) vel.x *= 0.95f;
+
+    if (!isPlayer) {
+        vel.x *= 0.95f;
+    }
 
     //横方向移動
     float oldX = pos.x;
     pos.x += vel.x;
 
-    std::string frontAttr = stage->GetTileFunction(pos.x + (vel.x > 0 ? radius : -radius), pos.y + radius - 5.0f);
-    if (frontAttr == "SOLID") {
-        if (stage->GetTileFunction(pos.x, pos.y - radius) == "NONE") {
-            pos.y -= 8.0f;
+    float frontX = pos.x + (vel.x > 0 ? radius : -radius);
+    float frontY = pos.y + radius - 5.0f;
+
+    std::string frontAttr = stage->GetTileFunction(frontX, frontY);
+
+    //横方向のBARRIER判定
+    if (frontAttr == "BARRIER") {
+        pos.x = oldX;
+
+        //右側の壁に接触した
+        if (vel.x > 0) {
+            vel.x = -15.0f;
         }
-        else {
-            pos.x = oldX;
-            vel.x = 0;
+        //左側の壁に接触した
+        else if (vel.x < 0) {
+            vel.x = 15.0f;
         }
+
+        //壁では接地扱いにしない
+        if (isPlayer) {
+            coyoteTime.SetGrounded(false);
+        }
+    }
+    //横方向のSOLIDとSPRING判定
+    else if (frontAttr == "SOLID" || frontAttr == "SPRING") {
+        pos.x = oldX;
+        vel.x = 0;
     }
 
     //縦方向移動
@@ -64,16 +89,25 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
     //足元確認
     float footX = pos.x;
     float footY = pos.y + radius;
+
     std::string attr = stage->GetTileFunction(footX, footY);
     std::string centerAttr = stage->GetTileFunction(pos.x, pos.y);
+
+    //頭上確認
+    float headX = pos.x;
+    float headY = pos.y - radius;
+
+    std::string headAttr = stage->GetTileFunction(headX, headY);
 
     //ゴール判定
     if (centerAttr == "GOAL" && !isGoalStarted) {
         if (pBall && isPlayer) {
             Ball2D* partner = pBall->GetPartner();
+
             if (partner) {
                 Ball2D::lastTotalDamage = partner->GetDamageCount();
             }
+
             isGoalStarted = true;
             return;
         }
@@ -87,9 +121,17 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
     {
         if (pBall) {
             pBall->OnDamage();
+
             vel.y = -10.0f;
-            if (stage->GetTileFunction(pos.x + radius, pos.y) == "SPIKE") vel.x = -15.0f;
-            if (stage->GetTileFunction(pos.x - radius, pos.y) == "SPIKE") vel.x = 15.0f;
+
+            if (stage->GetTileFunction(pos.x + radius, pos.y) == "SPIKE") {
+                vel.x = -15.0f;
+            }
+
+            if (stage->GetTileFunction(pos.x - radius, pos.y) == "SPIKE") {
+                vel.x = 15.0f;
+            }
+
             pos.y -= 5.0f;
             return;
         }
@@ -98,9 +140,14 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
     //斜面処理
     if (attr == "SLOPE_R" || attr == "SLOPE_L") {
         float localX = fmod(footX, TILE_SIZE);
-        if (localX < 0) localX += TILE_SIZE;
+
+        if (localX < 0) {
+            localX += TILE_SIZE;
+        }
+
         float tx = localX / TILE_SIZE;
         float ty = (attr == "SLOPE_R") ? (1.0f - tx) : tx;
+
         float tileBaseY = floor(footY / TILE_SIZE) * TILE_SIZE;
         float targetY = tileBaseY + (ty * TILE_SIZE) - radius;
 
@@ -111,19 +158,47 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
             //接地したのでコヨーテタイムを開始
             if (isPlayer) {
                 coyoteTime.Start();
+                coyoteTime.SetGrounded(true);
             }
         }
     }
-    //地面判定
-    else if (attr == "SOLID" || attr == "SPRING" || attr == "ICE" || attr == "ONE_WAY" || attr == "SPIKE") {
+    //通常ブロック処理
+    else if (attr == "SOLID" ||
+        attr == "SPRING" ||
+        attr == "ICE" ||
+        attr == "ONE_WAY" ||
+        attr == "SPIKE" ||
+        attr == "BARRIER") {
+
         bool isLanding = false;
         float tileTopY = floor(footY / TILE_SIZE) * TILE_SIZE;
 
-        if (attr == "ONE_WAY") {
-            if (!isDownPressed && vel.y > 0 && footY >= tileTopY && footY <= tileTopY + vel.y + 10.0f) {
+        //BARRIERは上から乗らず、ノックバックする
+        if (attr == "BARRIER") {
+            if (vel.y > 0) {
+                pos.y = tileTopY - radius;
+                vel.y = -15.0f;
+            }
+            else if (vel.y < 0) {
+                pos.y = tileTopY + TILE_SIZE + radius;
+                vel.y = 15.0f;
+            }
+
+            if (isPlayer) {
+                coyoteTime.SetGrounded(false);
+            }
+        }
+        //ONE_WAYは上からのみ着地
+        else if (attr == "ONE_WAY") {
+            if (!isDownPressed &&
+                vel.y > 0 &&
+                footY >= tileTopY &&
+                footY <= tileTopY + vel.y + 10.0f) {
+
                 isLanding = true;
             }
         }
+        //通常ブロック
         else if (vel.y > 0) {
             isLanding = true;
         }
@@ -145,6 +220,29 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
             //接地したのでコヨーテタイムを開始
             if (isPlayer && attr != "SPRING") {
                 coyoteTime.Start();
+                coyoteTime.SetGrounded(true);
+            }
+        }
+
+        //上昇中にブロック下面へ衝突
+        if (vel.y < 0 &&
+            (attr == "SOLID" ||
+                attr == "ICE" ||
+                attr == "SPRING" ||
+                attr == "SPIKE")) {
+
+            float tileBottomY = floor(headY / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
+
+            if (headY <= tileBottomY &&
+                stage->GetTileFunction(headX, tileBottomY) == attr) {
+
+                pos.y = tileBottomY + radius;
+                vel.y = 0;
+
+                //下面への衝突では接地扱いにしない
+                if (isPlayer) {
+                    coyoteTime.SetGrounded(false);
+                }
             }
         }
     }
@@ -154,8 +252,10 @@ void StageGimmick::UpdatePhysics(VECTOR2& pos, VECTOR2& vel, float radius, bool 
 void StageGimmick::DrawFade() {
     if (fadeAlpha > 0.0f) {
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)fadeAlpha);
+
         //画面全体を黒く塗る
         DrawFillBox(0, 0, 1280, 720, GetColor(0, 0, 0));
+
         SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
 }
